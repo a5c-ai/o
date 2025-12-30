@@ -1,0 +1,79 @@
+#! /bin/bash
+set -e
+CREDS_ENV_FILE=$HOME/.a5c/creds.env
+if [ -f $CREDS_ENV_FILE ]; then
+    source $CREDS_ENV_FILE
+    
+else
+    echo "creds.env not found, please create it. example: $CREDS_ENV_FILE"
+    echo "A5C_PROVIDER_NAME=\"azure\""
+    echo "A5C_SELECTED_CLI_COMMAND=\"codex\""
+    echo "A5C_SELECTED_MODEL=\"gpt-5.2\""
+    echo "AZURE_OPENAI_API_KEY=..."
+    echo "AZURE_OPENAI_PROJECT_NAME=..."
+    return 1
+fi
+# for example:
+# A5C_PROVIDER_NAME="azure"
+# A5C_SELECTED_CLI_COMMAND="codex"
+# A5C_SELECTED_MODEL="gpt-5.2"
+# AZURE_OPENAI_API_KEY=...
+# AZURE_OPENAI_PROJECT_NAME=...
+
+
+if [ -z "$A5C_SELECTED_CLI_COMMAND" ]; then
+    echo "A5C_SELECTED_CLI_COMMAND is not set, please set it to the CLI command to use. (codex, claude-code, etc.)"
+    return 1
+fi
+if [ -z "$A5C_SELECTED_MODEL" ]; then
+    echo "A5C_SELECTED_MODEL is not set, please set it to the model to use."
+    return 1
+fi
+if [ -z "$A5C_PROVIDER_NAME" ]; then
+    echo "A5C_PROVIDER_NAME is not set, please set it to the provider name to use. (azure, claude, etc.)"
+    return 1
+fi
+
+if [ "$A5C_SELECTED_CLI_COMMAND" == "codex" ]; then
+    export A5C_INSTALL_COMMAND="npm install -g @openai/codex@0.31.0"
+    export A5C_BASE_COMMAND="codex"
+    export A5C_CLI_ADDITIONAL_PARAMS=""
+    if [ "$A5C_PROVIDER_NAME" == "azure" ]; then
+        AZURE_PROVIDER="-c model_providers.azure.name=azure -c model_providers.azure.wire_api=responses -c model_providers.azure.base_url=https://$AZURE_OPENAI_PROJECT_NAME.openai.azure.com/openai -c model_providers.azure.env_key=AZURE_OPENAI_API_KEY -c model_providers.azure.query_params.api-version=2025-04-01-preview"
+        export A5C_CLI_ADDITIONAL_PARAMS="$A5C_CLI_ADDITIONAL_PARAMS -c model_provider=azure $AZURE_PROVIDER"
+    fi    
+    export A5C_CLI_ADDITIONAL_PARAMS="$A5C_CLI_ADDITIONAL_PARAMS --dangerously-bypass-approvals-and-sandbox -c model=$A5C_SELECTED_MODEL"
+    export A5C_CLI_COMMAND_INTERACTIVE="$A5C_BASE_COMMAND $A5C_CLI_ADDITIONAL_PARAMS --search"
+    export A5C_CLI_COMMAND="$A5C_BASE_COMMAND exec $A5C_CLI_ADDITIONAL_PARAMS"
+elif [ "$A5C_SELECTED_CLI_COMMAND" == "claude-code" ]; then
+    export A5C_INSTALL_COMMAND="npm install -g @anthropic-ai/claude-code"
+    export A5C_BASE_COMMAND="claude"
+    export A5C_CLI_ADDITIONAL_PARAMS="-p 'fulfill the request' --output-format stream-json --allowedTools Bash,Read,Glob,Grep,Write,MultiEdit,Edit,NotebookRead,NotebookEdit,WebFetch,TodoRead,TodoWrite,WebSearch,Task,Agent,mcp__github,mcp__agent_reporter --dangerously-skip-permissions --verbose --model $A5C_SELECTED_MODEL"
+    if [ "$A5C_PROVIDER_NAME" == "azure" ]; then
+        echo "Azure is not supported yet for claude-code."
+        return 1
+    elif [ "$A5C_PROVIDER_NAME" == "bedrock" ]; then
+        export CLAUDE_CODE_USE_BEDROCK=true
+    elif [ "$A5C_PROVIDER_NAME" == "vertex" ]; then
+        export CLOUD_ML_REGION=global 
+        export CLAUDE_CODE_USE_VERTEX=1
+    fi
+    export A5C_CLI_COMMAND_INTERACTIVE="$A5C_BASE_COMMAND $A5C_CLI_ADDITIONAL_PARAMS"
+    export A5C_CLI_COMMAND="$A5C_BASE_COMMAND -p 'fulfill the request' $A5C_CLI_ADDITIONAL_PARAMS"
+fi
+# WHEEL_URL="https://raw.githubusercontent.com/a5c-ai/a5c/main/docs/agent-script/wheel.md"
+# download if missing
+# if [ ! -f $A5C_ORCHESTRATION_AGENT_SCRIPT ]; then
+#     curl -o $A5C_ORCHESTRATION_AGENT_SCRIPT $WHEEL_URL
+# fi
+A5C_ORCHESTRATION_AGENT_SCRIPT=".a5c/o.md"
+
+# function wheel_i() {
+    request=$1
+    # concat the agent script and the request  
+    A5C_ORCHESTRATION_AGENT_SCRIPT_PROMPT_PATH=$(mktemp)
+    cat $A5C_ORCHESTRATION_AGENT_SCRIPT | sed "s/{{request}}/$request/g" > $A5C_ORCHESTRATION_AGENT_SCRIPT_PROMPT_PATH
+    # run the command
+    echo running: $A5C_CLI_COMMAND_INTERACTIVE
+    $A5C_CLI_COMMAND_INTERACTIVE -- "read $A5C_ORCHESTRATION_AGENT_SCRIPT_PROMPT_PATH and follow the instructions in the file - use the plannedwork process. use bash instead of powershell - 'C:\Program Files\Git\bin\bash.exe' -lc \'cmd\' "
+# }
