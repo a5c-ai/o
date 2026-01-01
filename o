@@ -912,20 +912,21 @@ main() {
 
   if [[ "$A5C_SELECTED_CLI_COMMAND" == "codex" ]]; then
     export A5C_INSTALL_COMMAND="npm install -g @openai/codex@0.31.0"
-    export A5C_BASE_COMMAND="codex"
+    export A5C_BASE_COMMAND=`which codex`
     export A5C_CLI_ADDITIONAL_PARAMS=""
     if [[ "$A5C_PROVIDER_NAME" == "azure" ]]; then
       [[ -n "${AZURE_OPENAI_PROJECT_NAME:-}" ]] || die "AZURE_OPENAI_PROJECT_NAME is required for provider=azure"
       [[ -n "${AZURE_OPENAI_API_KEY:-}" ]] || die "AZURE_OPENAI_API_KEY is required for provider=azure"
       local azure_provider
       azure_provider="-c model_providers.azure.name=azure -c model_providers.azure.wire_api=responses -c model_providers.azure.base_url=https://${AZURE_OPENAI_PROJECT_NAME}.openai.azure.com/openai -c model_providers.azure.env_key=AZURE_OPENAI_API_KEY -c model_providers.azure.query_params.api-version=2025-04-01-preview"
-      export A5C_CLI_ADDITIONAL_PARAMS="${A5C_CLI_ADDITIONAL_PARAMS} -c model_provider=azure ${azure_provider}"
+      export A5C_CLI_ADDITIONAL_PARAMS="${A5C_CLI_ADDITIONAL_PARAMS}-c model_provider=azure ${azure_provider}"
     fi
     export A5C_CLI_ADDITIONAL_PARAMS="${A5C_CLI_ADDITIONAL_PARAMS} --dangerously-bypass-approvals-and-sandbox -c model=${A5C_SELECTED_MODEL}"
     export A5C_CLI_COMMAND_INTERACTIVE="${A5C_BASE_COMMAND} ${A5C_CLI_ADDITIONAL_PARAMS} --search"
+    export A5C_CLI_COMMAND="${A5C_BASE_COMMAND} exec ${A5C_CLI_ADDITIONAL_PARAMS}"
   elif [[ "$A5C_SELECTED_CLI_COMMAND" == "claude-code" ]]; then
     export A5C_INSTALL_COMMAND="npm install -g @anthropic-ai/claude-code"
-    export A5C_BASE_COMMAND="claude"
+    export A5C_BASE_COMMAND=`which claude`
     export A5C_CLI_ADDITIONAL_PARAMS="-p 'fulfill the request' --output-format stream-json --allowedTools Bash,Read,Glob,Grep,Write,MultiEdit,Edit,NotebookRead,NotebookEdit,WebFetch,TodoRead,TodoWrite,WebSearch,Task,Agent,mcp__github,mcp__agent_reporter --dangerously-skip-permissions --verbose --model ${A5C_SELECTED_MODEL}"
     if [[ "$A5C_PROVIDER_NAME" == "azure" ]]; then
       die "Azure is not supported yet for claude-code."
@@ -936,15 +937,17 @@ main() {
       export CLAUDE_CODE_USE_VERTEX=1
     fi
     export A5C_CLI_COMMAND_INTERACTIVE="${A5C_BASE_COMMAND} ${A5C_CLI_ADDITIONAL_PARAMS}"
+    export A5C_CLI_COMMAND="${A5C_BASE_COMMAND} ${A5C_CLI_ADDITIONAL_PARAMS}"
   elif [[ "$A5C_SELECTED_CLI_COMMAND" == "gemini" ]]; then
     export A5C_INSTALL_COMMAND="$GEMINI_DEFAULT_INSTALL_COMMAND"
-    export A5C_BASE_COMMAND="gemini"
+    export A5C_BASE_COMMAND=`which gemini`
     local gemini_template="${A5C_GEMINI_COMMAND_TEMPLATE:-${A5C_CUSTOM_COMMAND_TEMPLATE:-}}"
     if [[ -z "$gemini_template" ]]; then
       gemini_template="$GEMINI_DEFAULT_COMMAND_TEMPLATE"
     fi
     export A5C_CUSTOM_COMMAND_TEMPLATE="$gemini_template"
     [[ "${A5C_CUSTOM_COMMAND_TEMPLATE}" == *"{{prompt_path}}"* ]] || die "A5C_CUSTOM_COMMAND_TEMPLATE must include {{prompt_path}}"
+    export A5C_CLI_COMMAND="${A5C_BASE_COMMAND} ${A5C_CLI_ADDITIONAL_PARAMS}"
   else
     [[ -n "${A5C_CUSTOM_COMMAND_TEMPLATE:-}" ]] || die "A5C_CUSTOM_COMMAND_TEMPLATE is required for custom runners (run ./o init)"
     [[ "${A5C_CUSTOM_COMMAND_TEMPLATE}" == *"{{prompt_path}}"* ]] || die "A5C_CUSTOM_COMMAND_TEMPLATE must include {{prompt_path}}"
@@ -962,7 +965,9 @@ main() {
 
   if [[ "$A5C_SELECTED_CLI_COMMAND" == "codex" || "$A5C_SELECTED_CLI_COMMAND" == "claude-code" ]]; then
     info "running: ${A5C_CLI_COMMAND_INTERACTIVE}"
-    ${A5C_CLI_COMMAND_INTERACTIVE} -- "read ${prompt_path} and follow the instructions in the file - use the plannedwork process."
+    RES="${A5C_CLI_COMMAND_INTERACTIVE} -- \"read ${prompt_path} and follow the instructions in the file\""
+    # run the command
+    eval "$RES"
   else
     info "running custom runner (command not echoed to avoid leaking secrets)"
     local cmd_template cmd
