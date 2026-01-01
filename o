@@ -61,19 +61,13 @@ elif [ "$A5C_SELECTED_CLI_COMMAND" == "claude-code" ]; then
     export A5C_CLI_COMMAND_INTERACTIVE="$A5C_BASE_COMMAND $A5C_CLI_ADDITIONAL_PARAMS"
     export A5C_CLI_COMMAND="$A5C_BASE_COMMAND -p 'fulfill the request' $A5C_CLI_ADDITIONAL_PARAMS"
 fi
-# WHEEL_URL="https://raw.githubusercontent.com/a5c-ai/a5c/main/docs/agent-script/wheel.md"
-# download if missing
-# if [ ! -f $A5C_ORCHESTRATION_AGENT_SCRIPT ]; then
-#     curl -o $A5C_ORCHESTRATION_AGENT_SCRIPT $WHEEL_URL
-# fi
+
 A5C_ORCHESTRATION_AGENT_SCRIPT=".a5c/o.md"
 
-# function wheel_i() {
-    request=$1
-    # concat the agent script and the request  
-    A5C_ORCHESTRATION_AGENT_SCRIPT_PROMPT_PATH=$(mktemp)
-    cat $A5C_ORCHESTRATION_AGENT_SCRIPT | sed "s/{{request}}/$request/g" > $A5C_ORCHESTRATION_AGENT_SCRIPT_PROMPT_PATH
-    # run the command
-    echo running: $A5C_CLI_COMMAND_INTERACTIVE
-    $A5C_CLI_COMMAND_INTERACTIVE -- "read $A5C_ORCHESTRATION_AGENT_SCRIPT_PROMPT_PATH and follow the instructions in the file - use the plannedwork process. use bash instead of powershell - 'C:\Program Files\Git\bin\bash.exe' -lc \'cmd\' "
-# }
+request=$1
+# concat the agent script and the request  
+A5C_ORCHESTRATION_AGENT_SCRIPT_PROMPT_PATH=$(mktemp)
+cat $A5C_ORCHESTRATION_AGENT_SCRIPT | sed "s/{{request}}/$request/g" > $A5C_ORCHESTRATION_AGENT_SCRIPT_PROMPT_PATH
+# run the command
+echo running: $A5C_CLI_COMMAND_INTERACTIVE
+$A5C_CLI_COMMAND_INTERACTIVE -- "read $A5C_ORCHESTRATION_AGENT_SCRIPT_PROMPT_PATH and follow the instructions in the file - use the plannedwork process."
