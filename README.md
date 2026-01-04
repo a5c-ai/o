@@ -6,7 +6,7 @@ It focuses on three practical problems when using agents for real work:
 
 - Process-following: put the orchestration prompt and reusable process patterns in the repo, so "how we work" is versioned next to the code.
 - Convergence to quality: use explicit quality criteria and evaluation loops (via the included process code patterns) to iterate until the result clears a threshold.
-- Predictability: keep runs reproducible by capturing inputs, prompts, work summaries, and an audit trail under a consistent `.a5c/runs/<run_id>/` convention (gitignored by default).
+- Predictability: encourage reproducible runs by capturing inputs, prompts, work summaries, and an audit trail under a consistent `.a5c/runs/<run_id>/` convention (gitignored by default).
 
 What this repo ships:
 
