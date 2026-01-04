@@ -138,3 +138,90 @@ export const decisionRecord = (task, ctx = {}, opts = {}) => {
   );
 };
 
+export const opportunityAssessment = (task, ctx = {}, opts = {}) => {
+  const input = normalizeTask(task);
+  return gate(
+    {
+      title: "Opportunity assessment",
+      prompt:
+        "Write an opportunity assessment suitable for leadership alignment. Include: " +
+        "problem, who it affects, current alternatives, why now, risks, " +
+        "recommended approach, and a crisp ask. Keep it <= 1 page of bullets.",
+      input,
+    },
+    ctx,
+    [
+      "Clarifies who has the problem and why it matters now",
+      "Recommendation is grounded in constraints and tradeoffs",
+      "Asks and next steps are concrete and time-bound",
+    ],
+    opts
+  );
+};
+
+export const experimentPlan = (task, ctx = {}, opts = {}) => {
+  const input = normalizeTask(task);
+  return gate(
+    {
+      title: "Experiment plan",
+      prompt:
+        "Create an experiment plan. Output JSON: " +
+        "{\"hypothesis\": string, \"primaryMetric\": string, \"guardrails\": string[], " +
+        "\"segments\": string[], \"design\": string, \"successCriteria\": string, " +
+        "\"duration\": string, \"rollout\": string[], \"analysisPlan\": string[], \"risks\": string[]}",
+      input,
+    },
+    ctx,
+    [
+      "Hypothesis is testable and ties to a primary metric",
+      "Guardrails prevent harm and are measurable",
+      "Design and analysis are credible and operationally feasible",
+    ],
+    opts
+  );
+};
+
+export const launchPlan = (task, ctx = {}, opts = {}) => {
+  const input = normalizeTask(task);
+  return gate(
+    {
+      title: "Launch plan",
+      prompt:
+        "Create a launch plan. Output JSON: " +
+        "{\"scope\": string[], \"audiences\": string[], \"enablement\": string[], " +
+        "\"rollout\": string[], \"monitoring\": string[], \"supportReadiness\": string[], " +
+        "\"comms\": [{\"audience\": string, \"message\": string, \"when\": string}], " +
+        "\"risks\": [{\"risk\": string, \"mitigation\": string}]}",
+      input,
+    },
+    ctx,
+    [
+      "Defines a rollout plan and how to detect issues quickly",
+      "Enablement/support readiness is actionable (not hand-wavy)",
+      "Comms are targeted with timing and owners implied",
+    ],
+    opts
+  );
+};
+
+export const roadmapNarrative = (task, ctx = {}, opts = {}) => {
+  const input = normalizeTask(task);
+  return gate(
+    {
+      title: "Roadmap narrative",
+      prompt:
+        "Write a roadmap narrative for the next 1-2 quarters. Include: " +
+        "themes, customer value, sequencing rationale, dependencies, and tradeoffs. " +
+        "Output JSON: {\"themes\": [{\"name\": string, \"why\": string, \"bets\": string[]}], " +
+        "\"tradeoffs\": string[], \"risks\": string[], \"openQuestions\": string[]}",
+      input,
+    },
+    ctx,
+    [
+      "Sequencing is justified by dependencies and impact",
+      "Tradeoffs and risks are explicit (not hidden)",
+      "Themes map to customer value and measurable outcomes",
+    ],
+    opts
+  );
+};

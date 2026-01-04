@@ -136,3 +136,44 @@ export const oncallTriage = (task, ctx = {}, opts = {}) => {
   );
 };
 
+export const rfc = (task, ctx = {}, opts = {}) => {
+  const input = normalizeTask(task);
+  return gate(
+    {
+      title: "RFC",
+      prompt:
+        "Write an RFC. Include: problem statement, context, goals/non-goals, " +
+        "proposed solution, alternatives, risks, rollout, and open questions. " +
+        "Prefer crisp bullets and clear decision points.",
+      input,
+    },
+    ctx,
+    [
+      "Problem and goals are clear and non-overlapping",
+      "Alternatives are considered fairly with tradeoffs",
+      "Rollout, risks, and open questions are explicit",
+    ],
+    opts
+  );
+};
+
+export const testStrategy = (task, ctx = {}, opts = {}) => {
+  const input = normalizeTask(task);
+  return gate(
+    {
+      title: "Test strategy",
+      prompt:
+        "Create a test strategy. Output JSON: " +
+        "{\"scope\": string, \"testPyramid\": {\"unit\": string[], \"integration\": string[], \"e2e\": string[]}, " +
+        "\"nonFunctional\": string[], \"tooling\": string[], \"ciGates\": string[], \"risks\": string[]}",
+      input,
+    },
+    ctx,
+    [
+      "Test pyramid is appropriate to risk and system shape",
+      "CI gates are explicit and map to risks",
+      "Includes non-functional testing where it matters (perf, security, reliability)",
+    ],
+    opts
+  );
+};

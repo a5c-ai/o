@@ -138,3 +138,69 @@ export const retrospective = (task, ctx = {}, opts = {}) => {
   );
 };
 
+export const criticalPathPlan = (task, ctx = {}, opts = {}) => {
+  const input = normalizeTask(task);
+  return gate(
+    {
+      title: "Critical path plan",
+      prompt:
+        "Create a critical path plan. Output JSON: " +
+        "{\"goal\": string, \"milestones\": [{\"name\": string, \"done\": string, \"eta\": string}], " +
+        "\"criticalPath\": [{\"step\": string, \"dependsOn\": string[], \"ownerRole\": string, \"risk\": string}], " +
+        "\"buffers\": string[], \"decisionPoints\": string[]}",
+      input,
+    },
+    ctx,
+    [
+      "Critical path steps are dependency-correct and owned",
+      "Decision points and buffers are explicit and realistic",
+      "Plan is actionable for weekly execution cadence",
+    ],
+    opts
+  );
+};
+
+export const raidLog = (task, ctx = {}, opts = {}) => {
+  const input = normalizeTask(task);
+  return gate(
+    {
+      title: "RAID log",
+      prompt:
+        "Create a RAID log. Output JSON: " +
+        "{\"risks\": [{\"risk\": string, \"likelihood\": \"low\"|\"med\"|\"high\", \"impact\": \"low\"|\"med\"|\"high\", \"mitigation\": string, \"ownerRole\": string}], " +
+        "\"assumptions\": [{\"assumption\": string, \"validation\": string, \"ownerRole\": string}], " +
+        "\"issues\": [{\"issue\": string, \"impact\": string, \"nextAction\": string, \"ownerRole\": string}], " +
+        "\"dependencies\": [{\"dependency\": string, \"neededBy\": string, \"ownerRole\": string, \"status\": string}]}",
+      input,
+    },
+    ctx,
+    [
+      "Risks are concrete with mitigation and ownership",
+      "Assumptions include how they will be validated",
+      "Issues and dependencies have next actions and needed-by dates",
+    ],
+    opts
+  );
+};
+
+export const scopeChangeAssessment = (task, ctx = {}, opts = {}) => {
+  const input = normalizeTask(task);
+  return gate(
+    {
+      title: "Scope change assessment",
+      prompt:
+        "Assess a scope change request. Output JSON: " +
+        "{\"change\": string, \"why\": string, \"impact\": {\"timeline\": string, \"cost\": string, \"risk\": string}, " +
+        "\"options\": [{\"option\": string, \"pros\": string[], \"cons\": string[]}], " +
+        "\"recommendation\": string, \"decisionsNeeded\": string[]}",
+      input,
+    },
+    ctx,
+    [
+      "Impact assessment is specific (timeline/cost/risk) not vague",
+      "Options include clear tradeoffs and constraints",
+      "Recommendation is actionable and decision-oriented",
+    ],
+    opts
+  );
+};

@@ -137,3 +137,44 @@ export const bugReport = (task, ctx = {}, opts = {}) => {
   );
 };
 
+export const incidentCommsDraft = (task, ctx = {}, opts = {}) => {
+  const input = normalizeTask(task);
+  return gate(
+    {
+      title: "Incident comms draft",
+      prompt:
+        "Draft an incident communication update for customers. Output JSON: " +
+        "{\"status\": string, \"impact\": string, \"whatWeKnow\": string, \"whatWeAreDoing\": string, " +
+        "\"workarounds\": string[], \"nextUpdateTime\": string, \"supportNotes\": string[]}",
+      input,
+    },
+    ctx,
+    [
+      "Sets expectations clearly without speculation or overpromising",
+      "Includes a concrete next update time and actionable workarounds",
+      "Internal support notes are practical for frontline teams",
+    ],
+    opts
+  );
+};
+
+export const escalationRunbook = (task, ctx = {}, opts = {}) => {
+  const input = normalizeTask(task);
+  return gate(
+    {
+      title: "Escalation runbook",
+      prompt:
+        "Create an escalation runbook for support -> engineering. Include: " +
+        "when to escalate, required evidence, severity rules, comms expectations, " +
+        "handoff template, and follow-up expectations.",
+      input,
+    },
+    ctx,
+    [
+      "Escalation triggers are clear and minimize noise",
+      "Evidence requirements are minimal but high-signal",
+      "Handoff is structured and leads to fast diagnosis",
+    ],
+    opts
+  );
+};

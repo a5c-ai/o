@@ -137,3 +137,65 @@ export const infraChangePlan = (task, ctx = {}, opts = {}) => {
   );
 };
 
+export const defineSLOs = (task, ctx = {}, opts = {}) => {
+  const input = normalizeTask(task);
+  return gate(
+    {
+      title: "Define SLOs",
+      prompt:
+        "Define SLOs for a service. Output JSON: " +
+        "{\"service\": string, \"slos\": [{\"name\": string, \"sli\": string, \"target\": string, \"window\": string}], " +
+        "\"alerts\": [{\"name\": string, \"signal\": string, \"threshold\": string, \"runbook\": string}], " +
+        "\"errorBudgetPolicy\": string[]}",
+      input,
+    },
+    ctx,
+    [
+      "SLIs are measurable and tied to user impact",
+      "Alerts are actionable and reference runbooks",
+      "Error budget policy includes decision guidance (freeze/escalate)",
+    ],
+    opts
+  );
+};
+
+export const gameDayPlan = (task, ctx = {}, opts = {}) => {
+  const input = normalizeTask(task);
+  return gate(
+    {
+      title: "Game day plan",
+      prompt:
+        "Create a game day / chaos exercise plan. Output JSON: " +
+        "{\"objective\": string, \"scenarios\": [{\"name\": string, \"inject\": string, \"expected\": string, \"rollback\": string}], " +
+        "\"prereqs\": string[], \"guardrails\": string[], \"roles\": string[], \"timeline\": string[], \"followUps\": string[]}",
+      input,
+    },
+    ctx,
+    [
+      "Scenarios are safe, reversible, and targeted",
+      "Guardrails and rollback steps are explicit",
+      "Follow-ups include concrete improvements and owners implied",
+    ],
+    opts
+  );
+};
+
+export const runbook = (task, ctx = {}, opts = {}) => {
+  const input = normalizeTask(task);
+  return gate(
+    {
+      title: "Runbook",
+      prompt:
+        "Write a runbook. Include: triggers, quick triage, diagnostics, mitigations, " +
+        "rollback options, and verification. Keep it copy/paste friendly.",
+      input,
+    },
+    ctx,
+    [
+      "Runbook is executable under pressure (ordered, minimal steps)",
+      "Includes clear verification signals and rollback options",
+      "Calls out safety constraints and blast radius considerations",
+    ],
+    opts
+  );
+};

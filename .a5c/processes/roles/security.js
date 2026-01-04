@@ -138,3 +138,44 @@ export const auditPrep = (task, ctx = {}, opts = {}) => {
   );
 };
 
+export const secureDesignReview = (task, ctx = {}, opts = {}) => {
+  const input = normalizeTask(task);
+  return gate(
+    {
+      title: "Secure design review",
+      prompt:
+        "Perform a secure design review. Include: data classification, trust boundaries, " +
+        "abuse cases, authz/authn model, secrets handling, logging/redaction, " +
+        "and a prioritized list of required changes before launch.",
+      input,
+    },
+    ctx,
+    [
+      "Identifies trust boundaries and abuse cases (not just generic threats)",
+      "Required changes are prioritized and testable",
+      "Covers auth, secrets, and sensitive data handling thoroughly",
+    ],
+    opts
+  );
+};
+
+export const dependencyPolicy = (task, ctx = {}, opts = {}) => {
+  const input = normalizeTask(task);
+  return gate(
+    {
+      title: "Dependency policy",
+      prompt:
+        "Draft a dependency and supply chain policy. Output JSON: " +
+        "{\"allowedSources\": string[], \"requirements\": string[], \"reviewTriggers\": string[], " +
+        "\"vulnSLA\": [{\"severity\": string, \"sla\": string}], \"exceptions\": string[]}",
+      input,
+    },
+    ctx,
+    [
+      "Policy is enforceable (clear triggers and requirements)",
+      "Vulnerability SLAs are realistic and risk-based",
+      "Exceptions process is explicit and auditable",
+    ],
+    opts
+  );
+};
