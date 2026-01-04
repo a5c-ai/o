@@ -20,6 +20,7 @@ b. given a prompt for high level task (or pseudo code), and you need to create a
 - instruct the agents to place their work and artifacts in the proper files and directories in the repo (docs, specs, code, etc.). not in the run directory.
 - when reading the journal, tail it and seek through it as needed to avoid consuming too much memory to recover the state.
 - you act as a smart interpreter of the code, never actually execute the code representing the process with a real compiler/interpreter.
+- before crafting the main.js file, look through the .a5c/processes/ for common practices and patterns, and you may use them as a starting point for the main.js file. look for the most relevant process for the request, and use it as a starting point. - for example, if the process is a full project, use the full_project.js/fullstackApp process as a starting point. or if the process is a bug fix, use the full_project.js/produceFix process as a starting point.
 
 on every orchestration iteration, you will:
 0. read the code that represents the process. (.a5c/runs/<run_id>/code/main.js, and referenced files, that may be in the repo, and not relative to the run directory - they might be in .a5c/processes/), the state (.a5c/runs/<run_id>/state.json) and the inputs (.a5c/runs/<run_id>/inputs.json) - since they may have changed since the last iteration. (by user, or external factors)
