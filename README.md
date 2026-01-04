@@ -1,16 +1,21 @@
-# `o` - orchestration agent runner
+# o - repo-local orchestration prompt runner
 
-Run a repo-local orchestration prompt (`.a5c/o.md`) through your preferred agent CLI (`codex`, `claude-code`, `gemini`, or a `custom` runner), with repeatable config + safe defaults for local artifacts.
+`o` is a small Bash runner that renders a repo-local orchestration prompt (`.a5c/o.md`) and runs it through your chosen agent CLI (`codex`, `claude-code`, `gemini`, or a `custom` runner).
 
-- **Small + portable:** a single Bash script (`./o`) plus `.a5c/` templates
-- **Developer-friendly:** interactive onboarding (`./o init`) + sanity checks (`./o doctor`)
-- **Low-risk by default:** creds live in a local env file and run artifacts live in `.a5c/runs/` (gitignored)
+It focuses on three practical problems when using agents for real work:
 
-> Platform note: `o` is Bash. On Windows, use **WSL2** (recommended) or **Git Bash/MSYS2**.
+- Process-following: put the orchestration prompt and reusable process patterns in the repo, so "how we work" is versioned next to the code.
+- Convergence to quality: use explicit quality criteria and evaluation loops (via the included process code patterns) to iterate until the result clears a threshold.
+- Predictability: keep runs reproducible by capturing inputs, prompts, work summaries, and an audit trail under a consistent `.a5c/runs/<run_id>/` convention (gitignored by default).
 
-This README follows common OSS README patterns (quickstart → install → usage → how it works → security → troubleshooting → contributing) and is written to stay aligned with `./o help` and `./install.sh --help`.
+What this repo ships:
 
-**Jump to:** [Quickstart](#quickstart) · [Prerequisites](#prerequisites) · [Install](#install) · [Usage](#usage) · [Configuration](#configuration) · [Security](#security-notes) · [Troubleshooting](#troubleshooting) · [Uninstall](#uninstall) · [Contributing](#contributing) · [`INSTALL.md`](INSTALL.md)
+- `./o`: loads config, renders `.a5c/o.md` with your request, and executes the configured runner.
+- `.a5c/`: templates for the orchestration prompt, function prompts, and reusable process patterns.
+
+Platform note: `o` is Bash. On Windows, use WSL2 (recommended) or Git Bash/MSYS2.
+
+Jump to: [Quickstart](#quickstart) | [Prerequisites](#prerequisites) | [Install](#install) | [Usage](#usage) | [Configuration](#configuration) | [How it works](#how-it-works) | [Why quality converges](#why-quality-converges) | [Security](#security-notes) | [Troubleshooting](#troubleshooting) | [Uninstall](#uninstall) | [Contributing](#contributing) | [`INSTALL.md`](INSTALL.md)
 
 ## Prerequisites
 
@@ -77,9 +82,9 @@ For full installation notes, see `INSTALL.md`.
 
 Core commands:
 
-- `./o init` — interactive onboarding, writes a config file
-- `./o doctor` — validates config + runner setup (`--show-install-hints` prints optional install hints)
-- `./o help` — usage + defaults
+- `./o init` - interactive onboarding, writes a config file
+- `./o doctor` - validates config + runner setup (`--show-install-hints` prints optional install hints)
+- `./o help` - usage + defaults
 
 Run a request (uses your configured runner):
 
@@ -123,10 +128,10 @@ Re-running `./o init` is idempotent: it rewrites only the managed block and pres
 
 `o` supports the following runners:
 
-- `codex` — providers: `openai` / `azure`
-- `claude-code` — providers: `anthropic` / `bedrock` / `vertex`
-- `gemini` — provider: `gemini`
-- `custom` — execute your own command template
+- `codex` - providers: `openai` / `azure`
+- `claude-code` - providers: `anthropic` / `bedrock` / `vertex`
+- `gemini` - provider: `gemini`
+- `custom` - execute your own command template
 
 `./o init` will prompt you for the relevant API key(s) and write them to the selected config file.
 
@@ -136,7 +141,7 @@ Custom runners are powerful, but they are also your trust boundary:
 
 - `A5C_CUSTOM_COMMAND_TEMPLATE` is executed via `bash -lc` on your machine.
 - The template **must** include `{{prompt_path}}` and should quote it.
-- Don’t embed secrets in the command template itself; keep secrets in the creds file.
+- Don't embed secrets in the command template itself; keep secrets in the creds file.
 - Treat runner binaries as part of your threat model (you are executing them on your machine).
 
 Example template (a runner that accepts a prompt file path):
@@ -156,18 +161,37 @@ Gemini-specific overrides (optional):
 
 ## How it works
 
-End-to-end flow:
+End-to-end flow (`./o "your request"`):
 
 1. `./o` loads your creds file (KV-only parsing; no `source`).
 2. It renders a temporary prompt from `.a5c/o.md` by substituting `{{request}}`.
 3. It runs the selected runner preset (`codex`, `claude-code`, `gemini`) or a custom command template.
-4. The orchestration prompt can write run artifacts under `.a5c/runs/`; installers manage `.gitignore` to keep these out of git by default.
+4. The orchestration prompt (not the Bash script) tells the agent how to structure work, including where to write artifacts.
 
-What’s in `.a5c/`:
+What is in `.a5c/`:
 
-- `.a5c/o.md`: the orchestration “driver” prompt.
-- `.a5c/functions/`: prompt templates for `act()`, `plan()`, `score()`.
-- `.a5c/processes/`: reusable process code (e.g., planned work, test-driven loops).
+- `.a5c/o.md`: the orchestration "driver" prompt.
+- `.a5c/functions/`: prompt templates for `act()`, `develop()`, `score()`.
+- `.a5c/processes/`: reusable process patterns expressed as code/pseudocode (e.g., planned work, test-driven loops, quality-gated iteration).
+
+Run artifacts (by convention):
+
+The default `.a5c/o.md` prompt expects the orchestrator to keep an audit trail and working state under `.a5c/runs/<run_id>/`, including:
+
+- `inputs.json` (what was asked)
+- `prompts/` and `work_summaries/` (what was sent to the runner and what came back)
+- `journal.jsonl` (append-only event log)
+- `state.json` (derived state for resuming)
+
+Installers manage `.gitignore` to keep `.a5c/runs/` out of git by default.
+
+## Why quality converges
+
+`o` itself is intentionally thin; the "quality convergence" comes from using repeatable process patterns in the orchestration prompt:
+
+- Make quality criteria explicit (what to evaluate, and what "good" means) instead of relying on implicit taste.
+- Use an evaluation loop (act -> score -> fix) until the score clears a threshold; see `.a5c/functions/score.md` and example process patterns like `.a5c/processes/development/aspects/quality_gated_iterative.js`.
+- Keep artifacts and feedback in the run directory so you can review, diff, and rerun with the same inputs and process.
 
 ## Security notes
 
@@ -177,16 +201,16 @@ What’s in `.a5c/`:
 
 ## Getting help
 
-- Start with `./o help` and `./o doctor --show-install-hints` (they’re the source of truth for flags + install hints).
+- Start with `./o help` and `./o doctor --show-install-hints` (they are the source of truth for flags + install hints).
 - Check `INSTALL.md` for installation notes and `Troubleshooting` below for common errors.
 - When asking for help, include sanitized output from `./o doctor` (avoid pasting secrets from your creds file).
 
 ## Troubleshooting
 
-- “`config not found. Run: ./o init`” → run `./o init` (or set `O_CREDS_FILE` / use `--file PATH`).
-- “unsupported line in config” → the creds file must be `KEY=VALUE` only (no shell snippets).
-- Runner CLI missing → run `./o doctor --show-install-hints` and follow the printed install command(s).
-- Permission warnings → consider `chmod 600 ~/.a5c/creds.env` and `chmod 700 ~/.a5c`.
+- "`config not found. Run: ./o init`" -> run `./o init` (or set `O_CREDS_FILE` / use `--file PATH`).
+- "unsupported line in config" -> the creds file must be `KEY=VALUE` only (no shell snippets).
+- Runner CLI missing -> run `./o doctor --show-install-hints` and follow the printed install command(s).
+- Permission warnings -> consider `chmod 600 ~/.a5c/creds.env` and `chmod 700 ~/.a5c`.
 
 ## Uninstall
 
@@ -197,7 +221,7 @@ rm -f ./o
 rm -rf ./.a5c/
 ```
 
-Optional (removes global config; only do this if you’re not using it for other repos):
+Optional (removes global config; only do this if you're not using it for other repos):
 
 ```bash
 rm -f ~/.a5c/creds.env
