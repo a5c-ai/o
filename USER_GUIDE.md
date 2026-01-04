@@ -1,10 +1,21 @@
 # User Guide: `o` (orchestration agent runner)
 
-`o` helps you use an AI coding agent on a real repo in a way you can re-run, review, and share. Instead of a one-off "ask an agent" session that disappears into chat history, `o` turns a request into a structured run with a consistent prompt, a predictable place for artifacts, and a trail you can inspect later.
+`o` is a repeatable, repo-local orchestration workflow for running an AI coding agent on real codebases. It turns a request into a structured run with a consistent prompt, predictable artifacts on disk, and explicit checkpoints where you can review and steer.
 
-You keep using the runner you already prefer (for example: `codex`, `claude-code`, `gemini`, or a `custom` runner). `o` just gives you a lightweight, repo-local workflow that makes agent work easier to operate day to day.
+Instead of hoping a single pass is "good enough", `o` is designed for quality convergence: the agent produces work, the run evaluates it against criteria, and the loop repeats until a threshold is met. Because the process and artifacts are recorded, outcomes are more predictable and auditable, and you can re-run the same workflow later.
+
+You keep using the runner you already prefer (for example: `codex`, `claude-code`, `gemini`, or a `custom` runner). `o` provides the lightweight, repo-local structure around that runner so agent work is easier to operate day to day.
 
 > Platform note: `o` is Bash. On Windows, use **WSL2** (recommended) or **Git Bash/MSYS2**.
+
+## How quality convergence works
+
+At a high level, an orchestration run follows a simple loop:
+
+- `act()` produces work (code changes, notes, patches, etc).
+- `score()` evaluates the work against explicit criteria and returns feedback.
+- If the score is below a threshold, the run iterates: `act()` improves the work using the feedback, then `score()` re-evaluates.
+- `breakpoint()` pauses the run for human steering or approval at important moments (before risky steps, after a plan, when tradeoffs are needed).
 
 ---
 
