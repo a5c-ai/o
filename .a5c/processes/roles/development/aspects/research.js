@@ -27,9 +27,9 @@ export const withResearch =
         { ...ctx, task: normalized }
       );
       checkpoint(checkpointName, ctx, { task: normalized, research });
-      return next(task, { ...ctx, research });
+      ctx.research = research;
+      return next(task, ctx);
     }
 
     return next(task, ctx);
   };
-

@@ -8,12 +8,14 @@ import { withOpsReview } from "../aspects/ops.js";
 import { withDocs } from "../aspects/docs.js";
 import { withErrorHandlingReview } from "../aspects/error_handling.js";
 import { withPerformanceReview } from "../aspects/performance.js";
+import { withDomainPlanning } from "../aspects/domain_planning.js";
 import { applyOptionalMiddlewares, normalizeFeature, normalizeQuality, withDomainContext } from "./_domain_utils.js";
 import { buildBackendQualityCriteria } from "./criteria.js";
 
 export const buildBackendDevelop = ({
   baseDevelop = defaultDevelop,
   checkpoint = false,
+  planning = {},
   research = { mode: "auto" },
   spec = {},
   tests = {},
@@ -24,6 +26,7 @@ export const buildBackendDevelop = ({
   docs = {},
   quality = { threshold: 0.9, maxIters: 4 },
 } = {}) => {
+  const planningOpt = normalizeFeature(planning, { checkpoint });
   const researchOpt = normalizeFeature(research, {
     mode: "auto",
     checkpointName: checkpoint ? "research" : "research_no_checkpoint",
@@ -37,6 +40,7 @@ export const buildBackendDevelop = ({
   const docsOpt = normalizeFeature(docs);
 
   const enabled = {
+    planning: planningOpt.enabled,
     research: researchOpt.enabled,
     spec: specOpt.enabled,
     tests: testsOpt.enabled,
@@ -56,6 +60,7 @@ export const buildBackendDevelop = ({
   return applyOptionalMiddlewares(
     baseDevelop,
     withDomainContext({ domain: "backend", aspects: enabled }),
+    planningOpt.enabled ? withDomainPlanning({ domain: "backend", checkpoint: planningOpt.checkpoint }) : null,
     researchOpt.enabled ? withResearch(researchOpt) : null,
     specOpt.enabled ? withSpec(specOpt) : null,
     testsOpt.enabled ? withTests(testsOpt) : null,

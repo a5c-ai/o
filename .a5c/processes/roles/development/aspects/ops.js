@@ -15,5 +15,6 @@ export const withOpsReview =
       { ...ctx, task: normalized }
     );
 
-    return next(task, { ...ctx, opsNotes });
+    ctx.opsNotes = opsNotes;
+    return next(task, ctx);
   };

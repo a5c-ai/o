@@ -15,6 +15,6 @@ export const withSecurityReview =
       { ...ctx, task: normalized }
     );
 
-    return next(task, { ...ctx, securityReview });
+    ctx.securityReview = securityReview;
+    return next(task, ctx);
   };
-

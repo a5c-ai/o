@@ -15,6 +15,6 @@ export const withDocs =
       { ...ctx, task: normalized }
     );
 
-    return next(task, { ...ctx, docsPlan });
+    ctx.docsPlan = docsPlan;
+    return next(task, ctx);
   };
-

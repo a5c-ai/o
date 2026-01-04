@@ -15,5 +15,6 @@ export const withDataDrivenWork =
       { ...ctx, task: normalized }
     );
 
-    return next(task, { ...ctx, dataNotes });
+    ctx.dataNotes = dataNotes;
+    return next(task, ctx);
   };

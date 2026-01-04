@@ -1,4 +1,4 @@
-import { runPlanExecute } from "../../core/loops/plan_execute.js";
+import { runPlanExecute } from "../../../core/loops/plan_execute.js";
 import { buildPackageDevelop } from "../domains/package.js";
 import { requireAct } from "./_shared.js";
 
@@ -26,4 +26,3 @@ export const dependencyUpgrade = (
   const wrapUp = act("Write a concise upgrade summary and verification checklist.", { ...ctx, planRun, execution });
   return { planRun, execution, wrapUp };
 };
-

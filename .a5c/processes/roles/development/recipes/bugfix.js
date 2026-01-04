@@ -1,4 +1,4 @@
-import { runTriageFixVerify } from "../../core/loops/triage_fix_verify.js";
+import { runTriageFixVerify } from "../../../core/loops/triage_fix_verify.js";
 import { buildDevelopForDomain, requireAct } from "./_shared.js";
 
 export const bugfix = (task, ctx = {}, { domain = "backend", quality = true } = {}) => {
@@ -18,4 +18,3 @@ export const bugfix = (task, ctx = {}, { domain = "backend", quality = true } = 
 
   return { ...result, post };
 };
-

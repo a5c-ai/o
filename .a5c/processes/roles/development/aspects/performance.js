@@ -15,6 +15,6 @@ export const withPerformanceReview =
       { ...ctx, task: normalized }
     );
 
-    return next(task, { ...ctx, performanceNotes });
+    ctx.performanceNotes = performanceNotes;
+    return next(task, ctx);
   };
-

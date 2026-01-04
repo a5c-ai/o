@@ -1,5 +1,5 @@
-import { applyMiddlewares } from "../../core/compose.js";
-import { defaultDevelop } from "../../core/primitives.js";
+import { applyMiddlewares } from "../../../core/compose.js";
+import { defaultDevelop } from "../../../core/primitives.js";
 import { withSpec } from "../aspects/spec.js";
 import { withTests } from "../aspects/tests.js";
 import { withQualityGate } from "../aspects/quality.js";
@@ -23,4 +23,3 @@ export const qualityGatedChange = (
   const summary = act("Write a short summary and verification checklist.", { ...ctx, work });
   return { work, summary };
 };
-

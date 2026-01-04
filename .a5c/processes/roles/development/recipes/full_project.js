@@ -25,7 +25,7 @@ export const fullProject = (
     act(
       partsPrompt ??
         "From the project definition, list project parts in dependency order. " +
-          "Return array of {\"name\": string, \"domain\": \"frontend\"|\"backend\"|\"data\"|\"infra\"|\"workers\"|\"integration\"|\"sdk\"|\"package\", \"task\": string}.",
+          "Return array of {\"name\": string, \"domain\": \"frontend\"|\"nextjs_app\"|\"backend\"|\"data\"|\"infra\"|\"aws_serverless\"|\"kubernetes_service\"|\"gcp_cloudrun\"|\"workers\"|\"integration\"|\"sdk\"|\"package\", \"task\": string}.",
       { ...ctx, project, requestedTask: task }
     ) ?? [];
 
@@ -33,11 +33,14 @@ export const fullProject = (
   for (const part of Array.isArray(parts) ? parts : []) {
     const domain =
       (domainForPart && domainForPart(part, ctx)) ?? part.domain ?? ctx.domain ?? "backend";
-    const develop = buildDevelopForDomain(domain, { baseDevelop: ctx.develop, quality });
+    const develop = buildDevelopForDomain(domain, {
+      baseDevelop: ctx.develop,
+      quality,
+      planning: { enabled: true, checkpoint: true },
+    });
     const output = develop(part.task ?? part.name ?? "Part", { ...ctx, project, part });
     partResults.push({ part, domain, output });
   }
 
   return { requestedTask: task, project, parts, partResults };
 };
-

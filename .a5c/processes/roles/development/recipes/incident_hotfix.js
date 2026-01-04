@@ -1,7 +1,7 @@
-import { primitivesFrom, requirePrimitive } from "../../core/primitives.js";
-import { checkpointStuck, checkpointRelease } from "../../core/checkpoints.js";
+import { primitivesFrom, requirePrimitive } from "../../../core/primitives.js";
+import { checkpointStuck, checkpointRelease } from "../../../core/checkpoints.js";
 import { buildBackendDevelop } from "../domains/backend.js";
-import { runTriageFixVerify } from "../../core/loops/triage_fix_verify.js";
+import { runTriageFixVerify } from "../../../core/loops/triage_fix_verify.js";
 
 export const incidentHotfix = (task, ctx = {}, { checkpoint = true } = {}) => {
   const { act } = primitivesFrom(ctx);
@@ -29,4 +29,3 @@ export const incidentHotfix = (task, ctx = {}, { checkpoint = true } = {}) => {
 
   return { severity, result, releaseChecklist };
 };
-

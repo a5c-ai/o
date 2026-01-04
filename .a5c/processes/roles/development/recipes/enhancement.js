@@ -1,5 +1,5 @@
-import { runPlanExecute } from "../../core/loops/plan_execute.js";
-import { runQualityGate } from "../../core/loops/quality_gate.js";
+import { runPlanExecute } from "../../../core/loops/plan_execute.js";
+import { runQualityGate } from "../../../core/loops/quality_gate.js";
 import { buildDevelopForDomain, requireAct } from "./_shared.js";
 
 export const enhancement = (
@@ -34,4 +34,3 @@ export const enhancement = (
 
   return { planRun, wrapUp };
 };
-

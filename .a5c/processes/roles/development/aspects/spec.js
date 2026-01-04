@@ -16,7 +16,7 @@ export const withSpec =
       { ...ctx, task: normalized }
     );
 
+    ctx.spec = spec;
     if (checkpoint) checkpointSpec(ctx, { task: normalized, spec });
-    return next(task, { ...ctx, spec });
+    return next(task, ctx);
   };
-

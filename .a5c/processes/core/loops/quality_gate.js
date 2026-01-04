@@ -47,9 +47,10 @@ export const runQualityGate = ({
   let last = null;
 
   for (let iter = 1; iter <= maxIters; iter++) {
-    const work = develop(currentTask, { ...ctx, qualityCriteria, qualityGateIter: iter });
+    const iterCtx = { ...ctx, qualityCriteria, qualityGateIter: iter };
+    const work = develop(currentTask, iterCtx);
     const scoreResult =
-      typeof score === "function" ? score({ ...ctx, work, qualityCriteria }) : null;
+      typeof score === "function" ? score({ ...iterCtx, work, qualityCriteria }) : null;
     const numericScore = coerceScore(scoreResult);
 
     last = { iter, work, scoreResult, numericScore, qualityCriteria };
@@ -74,4 +75,3 @@ export const runQualityGate = ({
 
   return last?.work ?? develop(task, ctx);
 };
-

@@ -16,7 +16,7 @@ export const withTests =
       { ...ctx, task: normalized }
     );
 
+    ctx.testPlan = testPlan;
     if (checkpoint) checkpointTests(ctx, { task: normalized, testPlan });
-    return next(task, { ...ctx, testPlan });
+    return next(task, ctx);
   };
-

@@ -15,6 +15,6 @@ export const withErrorHandlingReview =
       { ...ctx, task: normalized }
     );
 
-    return next(task, { ...ctx, errorHandlingNotes });
+    ctx.errorHandlingNotes = errorHandlingNotes;
+    return next(task, ctx);
   };
-

@@ -4,24 +4,28 @@ import { withTests } from "../aspects/tests.js";
 import { withDocs } from "../aspects/docs.js";
 import { withQualityGate } from "../aspects/quality.js";
 import { withRefactorGuardrails } from "../aspects/refactor.js";
+import { withDomainPlanning } from "../aspects/domain_planning.js";
 import { applyOptionalMiddlewares, normalizeFeature, normalizeQuality, withDomainContext } from "./_domain_utils.js";
 import { buildSdkQualityCriteria } from "./criteria.js";
 
 export const buildSdkDevelop = ({
   baseDevelop = defaultDevelop,
   checkpoint = false,
+  planning = {},
   spec = {},
   tests = {},
   docs = {},
   refactor = {},
   quality = { threshold: 0.9, maxIters: 4 },
 } = {}) => {
+  const planningOpt = normalizeFeature(planning, { checkpoint });
   const specOpt = normalizeFeature(spec, { checkpoint });
   const testsOpt = normalizeFeature(tests, { checkpoint });
   const refactorOpt = normalizeFeature(refactor);
   const docsOpt = normalizeFeature(docs);
 
   const enabled = {
+    planning: planningOpt.enabled,
     spec: specOpt.enabled,
     tests: testsOpt.enabled,
     refactor: refactorOpt.enabled,
@@ -37,6 +41,7 @@ export const buildSdkDevelop = ({
   return applyOptionalMiddlewares(
     baseDevelop,
     withDomainContext({ domain: "sdk", aspects: enabled }),
+    planningOpt.enabled ? withDomainPlanning({ domain: "sdk", checkpoint: planningOpt.checkpoint }) : null,
     specOpt.enabled ? withSpec(specOpt) : null,
     testsOpt.enabled ? withTests(testsOpt) : null,
     refactorOpt.enabled ? withRefactorGuardrails(refactorOpt) : null,

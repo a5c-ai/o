@@ -26,10 +26,7 @@ export const withDomainContext =
   ({ domain, aspects } = {}) =>
   (next) =>
   (task, ctx = {}) => {
-    return next(task, {
-      ...ctx,
-      domain: ctx.domain ?? domain,
-      domainAspects: ctx.domainAspects ?? aspects,
-    });
+    ctx.domain = ctx.domain ?? domain;
+    ctx.domainAspects = ctx.domainAspects ?? aspects;
+    return next(task, ctx);
   };
-

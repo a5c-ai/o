@@ -15,6 +15,6 @@ export const withRefactorGuardrails =
       { ...ctx, task: normalized }
     );
 
-    return next(task, { ...ctx, refactorGuardrails });
+    ctx.refactorGuardrails = refactorGuardrails;
+    return next(task, ctx);
   };
-

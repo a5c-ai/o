@@ -15,6 +15,6 @@ export const withGitHygiene =
       { ...ctx, task: normalized }
     );
 
-    return next(task, { ...ctx, gitNotes });
+    ctx.gitNotes = gitNotes;
+    return next(task, ctx);
   };
-

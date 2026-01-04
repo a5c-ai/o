@@ -1,3 +1,5 @@
+import { getDomainCriteriaPack } from "./packs/registry.js";
+
 const maybeAdd = (arr, enabled, ...items) => {
   if (!enabled) return arr;
   arr.push(...items);
@@ -11,6 +13,7 @@ export const buildBackendQualityCriteria = (task, ctx = {}, enabled = {}) => {
     "Implementation is correct, minimal, and maintainable",
   ];
 
+  maybeAdd(criteria, enabled.planning, ...getDomainCriteriaPack(ctx.domain ?? "backend"));
   maybeAdd(criteria, enabled.errorHandling, "Error handling covers failure modes, timeouts, and retries");
   maybeAdd(criteria, enabled.security, "Security risks are assessed (inputs, authz/authn, secrets, deps)");
   maybeAdd(criteria, enabled.ops, "Ops readiness: monitoring, runbook, rollback, safe deploy strategy");
@@ -26,6 +29,7 @@ export const buildFrontendQualityCriteria = (task, ctx = {}, enabled = {}) => {
     "Verification plan is actionable (unit, e2e, manual checks)",
   ];
 
+  maybeAdd(criteria, enabled.planning, ...getDomainCriteriaPack(ctx.domain ?? "frontend"));
   maybeAdd(criteria, enabled.performance, "Performance impact is assessed and measured where appropriate");
   maybeAdd(criteria, enabled.docs, "Docs and examples are updated as needed");
 
@@ -39,6 +43,7 @@ export const buildInfraQualityCriteria = (task, ctx = {}, enabled = {}) => {
     "Verification plan is actionable (plan, diff, smoke checks)",
   ];
 
+  maybeAdd(criteria, enabled.planning, ...getDomainCriteriaPack(ctx.domain ?? "infra"));
   maybeAdd(criteria, enabled.security, "Security risks are assessed (IAM, network exposure, secrets)");
   maybeAdd(criteria, enabled.ops, "Operational readiness: monitoring, alerts, runbooks");
   maybeAdd(criteria, enabled.docs, "Docs and runbooks are updated as needed");
@@ -53,6 +58,7 @@ export const buildDataQualityCriteria = (task, ctx = {}, enabled = {}) => {
     "Results are reproducible and auditable",
   ];
 
+  maybeAdd(criteria, enabled.planning, ...getDomainCriteriaPack(ctx.domain ?? "data"));
   maybeAdd(criteria, enabled.dataDriven, "Work includes metrics/logging/experiments to validate impact");
   return criteria;
 };
@@ -64,6 +70,7 @@ export const buildWorkersQualityCriteria = (task, ctx = {}, enabled = {}) => {
     "Operational readiness is considered (queues, metrics, alerts)",
   ];
 
+  maybeAdd(criteria, enabled.planning, ...getDomainCriteriaPack(ctx.domain ?? "workers"));
   maybeAdd(criteria, enabled.errorHandling, "Error handling covers retries/backoff, poison messages, and DLQ strategy");
   maybeAdd(criteria, enabled.ops, "Ops readiness: monitoring, runbooks, safe deploy strategy");
   return criteria;
@@ -76,6 +83,7 @@ export const buildSdkQualityCriteria = (task, ctx = {}, enabled = {}) => {
     "Test and verification plan covers integration and examples",
   ];
 
+  maybeAdd(criteria, enabled.planning, ...getDomainCriteriaPack(ctx.domain ?? "sdk"));
   maybeAdd(criteria, enabled.refactor, "Refactor guardrails are followed and diffs stay minimal");
   maybeAdd(criteria, enabled.docs, "Docs and examples are updated as needed");
   return criteria;
@@ -88,6 +96,7 @@ export const buildPackageQualityCriteria = (task, ctx = {}, enabled = {}) => {
     "Verification plan is actionable and executed where possible",
   ];
 
+  maybeAdd(criteria, enabled.planning, ...getDomainCriteriaPack(ctx.domain ?? "package"));
   maybeAdd(criteria, enabled.git, "Commit plan and file hygiene are reasonable");
   maybeAdd(criteria, enabled.docs, "Docs and examples are updated as needed");
   return criteria;
@@ -100,8 +109,8 @@ export const buildIntegrationQualityCriteria = (task, ctx = {}, enabled = {}) =>
     "Observability and supportability are considered (logs, metrics, tracing)",
   ];
 
+  maybeAdd(criteria, enabled.planning, ...getDomainCriteriaPack(ctx.domain ?? "integration"));
   maybeAdd(criteria, enabled.security, "Security risks are assessed (auth, secrets, PII, partner risk)");
   maybeAdd(criteria, enabled.docs, "Docs are updated (setup, configs, runbooks)");
   return criteria;
 };
-

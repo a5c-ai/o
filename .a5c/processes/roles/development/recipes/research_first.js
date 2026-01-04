@@ -1,8 +1,8 @@
-import { applyMiddlewares } from "../../core/compose.js";
-import { defaultDevelop } from "../../core/primitives.js";
+import { applyMiddlewares } from "../../../core/compose.js";
+import { defaultDevelop } from "../../../core/primitives.js";
 import { withResearch } from "../aspects/research.js";
 import { withSpec } from "../aspects/spec.js";
-import { runPlanExecute } from "../../core/loops/plan_execute.js";
+import { runPlanExecute } from "../../../core/loops/plan_execute.js";
 import { requireAct } from "./_shared.js";
 
 export const researchFirst = (task, ctx = {}, { checkpoint = true } = {}) => {
@@ -25,4 +25,3 @@ export const researchFirst = (task, ctx = {}, { checkpoint = true } = {}) => {
 
   return { planRun, decisions };
 };
-
