@@ -1,4 +1,4 @@
-# `o` — orchestration agent runner
+# `o` - orchestration agent runner
 
 Run a repo-local orchestration prompt (`.a5c/o.md`) through your preferred agent CLI (`codex`, `claude-code`, `gemini`, or a `custom` runner), with repeatable config + safe defaults for local artifacts.
 
