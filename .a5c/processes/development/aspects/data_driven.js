@@ -14,3 +14,7 @@ export const potentiallyDataDrivenDevelopTask = (task,context,developFn) => {
         return developFn(task, context)
     }
 }
+
+export const withDataDrivenDevelopment = (developFn) => (task,context) => {
+    return potentiallyDataDrivenDevelopTask(task,context, developFn);
+}

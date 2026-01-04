@@ -1,7 +1,20 @@
+import { withQualityGatedIterativeDevelopment } from "../aspects/quality_gated_iterative";
+import { withCodeDocumentation } from "../aspects/code_documentation";
+import { withErrorHandling } from "../aspects/error_handling";
+import { withTopDownDevelopment } from "../aspects/top_down";
+import { withSecurity } from "../aspects/security";
+import { withCompliance } from "../aspects/compliance";
+import { withContinousDelivery } from "../aspects/continous_delivery";
+import { withRefactoring } from "../aspects/refactoring";
+import { withTestDrivenDevelopment } from "../aspects/test_driven";
+import { withSpecDrivenDevelopment } from "../aspects/spec_driven";
+import { withResearchBeforeDevelopment } from "../aspects/research_driven";
 export const frontendDevelop = (basicDevelopmentFunction) => {
     return (task,context) => {
         let developmentFunction = basicDevelopmentFunction;
         // test driven development
+        developmentFunction = withQualityGatedIterativeDevelopment(developmentFunction);
+        developmentFunction = withResearchBeforeDevelopment(developmentFunction);
         if(context.scope.testDrivenDevelopment) {
             developmentFunction = withTestDrivenDevelopment(developmentFunction);        
         }

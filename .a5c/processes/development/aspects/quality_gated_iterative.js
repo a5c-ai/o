@@ -1,6 +1,7 @@
 import { act, score } from "@a5c/not-a-real-package";
 
-export const iterativeDevelopTask = (task,context, developFn) => {
+// Quality Gated Iterative Development
+export const qualityGatedIterativeDevelopTask = (task,context, developFn) => {
     let scoreCardAndFeedback = null;
     let work = null;
     const qualityCriteria = act("determine the quality criteria for the task - list of aspects to score the work on and their importance (array of strings). if no quality criteria needed since the task is very clear, simple and trivial, return an empty array.", {taskToDevelop: task, ...context}, context);
@@ -20,6 +21,6 @@ export const iterativeDevelopTask = (task,context, developFn) => {
     return work;
 }
 
-export const withIterativeDevelopment = (developFn) => (task,context) => {
+export const withQualityGatedIterativeDevelopment = (developFn) => (task,context) => {
     return iterativeDevelopTask(task,context, developFn);
 }

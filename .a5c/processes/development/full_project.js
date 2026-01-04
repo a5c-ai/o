@@ -7,6 +7,7 @@ import { implementWorkers } from "./specializations/workers";
 import { implementDataStore } from "./specializations/data_engineering";
 import { implementInfrastructure } from "./specializations/infrastructure";
 import { implementETLProcesses } from "./specializations/data_engineering";
+import { withQualityGatedIterativeDevelopment } from "./aspects/quality_gated_iterative";
 
 export const partTypes = [
     'mobile-frontend',
@@ -110,7 +111,7 @@ export const systemDesign = (context) => {
     return context;
 }
 export const requirements = (context) => {
-    return withIterativeDevelopment(act)("define the requirements of the project", context);
+    return withQualityGatedIterativeDevelopment(act)("define the requirements of the project", context);
 }
 export const goals = (context) => {
     return act("define the goals of the project", context);
@@ -119,7 +120,7 @@ export const constraints = (context) => {
     return act("define the constraints of the project", context);
 }
 export const spec = (context) => {
-    return withIterativeDevelopment(act)("define the spec of the project", context);
+    return withQualityGatedIterativeDevelopment(act)("define the spec of the project", context);
 }
 export const architecture = (context) => {
     return act("define the architecture of the project", context);
@@ -128,13 +129,13 @@ export const stack = (context) => {
     return withResearchBeforeDevelopment(act)("define the stack of the project", context);
 }
 export const dataModel = (context) => {
-    return withIterativeDevelopment(act)("define the data model of the project", context);
+    return withQualityGatedIterativeDevelopment(act)("define the data model of the project", context);
 }
 export const integrationsStrategy = (context) => {
     return withResearchBeforeDevelopment(act)("define the integrations strategy of the project", context);
 }
 export const scope = (context) => {
-    return withIterativeDevelopment(act)("define the scope of the project", context);
+    return withQualityGatedIterativeDevelopment(act)("define the scope of the project", context);
 }
 export const define = (context) => {
     context.requirements = requirements(context);
@@ -188,7 +189,7 @@ export const fullstackApp = (context) => {
 export const produceEnhancement = (task,context) => {
     // produce the enhancement    
     let developmentFunction = develop;
-    developmentFunction = withIterativeDevelopment(developmentFunction);
+    developmentFunction = withQualityGatedIterativeDevelopment(developmentFunction);
     developmentFunction = withTestDrivenDevelopment(developmentFunction);
     developmentFunction = withSpecDrivenDevelopment(developmentFunction);
     developmentFunction = withTopDownDevelopment(developmentFunction);
@@ -199,7 +200,7 @@ export const produceEnhancement = (task,context) => {
 export const produceChange = (task,context) => {
     // produce the change
     let developmentFunction = develop;
-    developmentFunction = withIterativeDevelopment(developmentFunction);
+    developmentFunction = withQualityGatedIterativeDevelopment(developmentFunction);
     developmentFunction = withTestDrivenDevelopment(developmentFunction);
     developmentFunction = withSpecDrivenDevelopment(developmentFunction);
     developmentFunction = withTopDownDevelopment(developmentFunction);
@@ -210,7 +211,7 @@ export const produceChange = (task,context) => {
 export const produceFix = (task,context) => {
     // produce the bug fix
     let developmentFunction = develop;
-    developmentFunction = withIterativeDevelopment(developmentFunction);
+    developmentFunction = withQualityGatedIterativeDevelopment(developmentFunction);
     developmentFunction = withTestDrivenDevelopment(developmentFunction);
     developmentFunction = withSpecDrivenDevelopment(developmentFunction);    
     developmentFunction = withTopDownDevelopment(developmentFunction);
