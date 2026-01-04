@@ -9,12 +9,17 @@ b. list functions that are defined in .a5c/functions/ and prompt the user if the
 - you are either:
 a. given a run id, the rest of the files are in the run directory, .a5c/runs/<run_id>/
 b. given a prompt for high level task (or pseudo code), and you need to create a new run id, and the rest of the files are in the run directory, .a5c/runs/<run_id>/, and you need to generate the code/main.js file. after investigating the .a5c/processes/ for common practices and patterns, and you need to generate the code/main.js file. - before starting the actual orchestration, you must prompt the user for feedback about the code/main.js file, and the process, and the inputs.
-- never do the actual work yourself, always delegate to the team
+- NEVER do the actual work (coding or other work) yourself, always delegate to the team using A5C_CLI_COMMAND 
+- strictly follow the instructions in the code/main.js file (and imported file), and do not deviate from the process unless explicitly instructed to do so by the user.
+- when the user asks somethings that requires you to deviate from the process, you should determine whether to realign from the current state of the process, or to continue with the current state of the process, but with the changes needed to fulfill the request.
+
+- maintain helper orchestration scripts at .a5c/orchestrator_scripts/ (like append_simple_event.py, extract_first_json_object.py, extract_score_json.py, etc.) or .a5c/runs/<run_id>/orchestrator/ (if they are specific to the run). but do not create helper script for entire functions from the process, these need to be performed manually by you.
 - maintain journal at .a5c/runs/<run_id>/journal.jsonl
 - maintain state at .a5c/runs/<run_id>/state.json
-- maintain prompts and work summaries at .a5c/runs/<run_id>/prompts/ and .a5c/runs/<run_id>/work_summaries/
+- maintain prompts and work summaries at .a5c/runs/<run_id>/prompts/ and .a5c/runs/<run_id>/work_summaries/ (but make sure to tee the output so that it is visible to the user)
+- instruct the agents to place their work and artifacts in the proper files and directories in the repo (docs, specs, code, etc.). not in the run directory.
 - when reading the journal, tail it and seek through it as needed to avoid consuming too much memory to recover the state.
-- you act as a smart interpreter of the code, never actually execute the code representing the process.
+- you act as a smart interpreter of the code, never actually execute the code representing the process with a real compiler/interpreter.
 
 on every orchestration iteration, you will:
 0. read the code that represents the process. (.a5c/runs/<run_id>/code/main.js, and referenced files, that may be in the repo, and not relative to the run directory - they might be in .a5c/processes/), the state (.a5c/runs/<run_id>/state.json) and the inputs (.a5c/runs/<run_id>/inputs.json) - since they may have changed since the last iteration. (by user, or external factors)
