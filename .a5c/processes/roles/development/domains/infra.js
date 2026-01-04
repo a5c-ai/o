@@ -1,0 +1,46 @@
+import { defaultDevelop } from "../../../core/primitives.js";
+import { withSpec } from "../aspects/spec.js";
+import { withOpsReview } from "../aspects/ops.js";
+import { withSecurityReview } from "../aspects/security.js";
+import { withDocs } from "../aspects/docs.js";
+import { withQualityGate } from "../aspects/quality.js";
+import { applyOptionalMiddlewares, normalizeFeature, normalizeQuality, withDomainContext } from "./_domain_utils.js";
+import { buildInfraQualityCriteria } from "./criteria.js";
+
+export const buildInfraDevelop = ({
+  baseDevelop = defaultDevelop,
+  checkpoint = false,
+  spec = {},
+  ops = {},
+  security = {},
+  docs = {},
+  quality = { threshold: 0.9, maxIters: 5 },
+} = {}) => {
+  const specOpt = normalizeFeature(spec, { checkpoint });
+  const opsOpt = normalizeFeature(ops);
+  const securityOpt = normalizeFeature(security);
+  const docsOpt = normalizeFeature(docs);
+
+  const enabled = {
+    spec: specOpt.enabled,
+    ops: opsOpt.enabled,
+    security: securityOpt.enabled,
+    docs: docsOpt.enabled,
+  };
+
+  const qualityOpt = normalizeQuality(quality, {
+    threshold: 0.9,
+    maxIters: 5,
+    buildCriteria: (task, ctx) => buildInfraQualityCriteria(task, ctx, enabled),
+  });
+
+  return applyOptionalMiddlewares(
+    baseDevelop,
+    withDomainContext({ domain: "infra", aspects: enabled }),
+    specOpt.enabled ? withSpec(specOpt) : null,
+    opsOpt.enabled ? withOpsReview(opsOpt) : null,
+    securityOpt.enabled ? withSecurityReview(securityOpt) : null,
+    docsOpt.enabled ? withDocs(docsOpt) : null,
+    qualityOpt.enabled ? withQualityGate(qualityOpt) : null
+  );
+};

@@ -28,7 +28,7 @@ on every orchestration iteration, you will:
 1. tail the journal (.a5c/runs/<run_id>/journal.jsonl) and seek through it as needed to avoid consuming too much memory to recover the state.
 2. understand the current state (local and global) and the current statement, derived from the journal and code
 3. understand how to act based on the code and the state
-4. act based on the code and the state (act() or score(), breakpoint(), etc.) - 
+4. act based on the code and the state (act() or score(), breakpoint(), etc.) - o() function calls should be evaluated by the orchestrator, not the agents. all the other function calls should be delegated to the agents.
 5. when breakpoint is hit, you need the prompt the user for feedback, steering of the process, or other clarification.
 6. write a new event to the journal that represents the work that was done. with enough description to recover the state from the journal later.
 7. update the state and proceed with the next statement in the code.

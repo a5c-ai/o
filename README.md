@@ -190,7 +190,7 @@ Installers manage `.gitignore` to keep `.a5c/runs/` out of git by default.
 `o` itself is intentionally thin; the "quality convergence" comes from using repeatable process patterns in the orchestration prompt:
 
 - Make quality criteria explicit (what to evaluate, and what "good" means) instead of relying on implicit taste.
-- Use an evaluation loop (act -> score -> fix) until the score clears a threshold; see `.a5c/functions/score.md` and example process patterns like `.a5c/processes/development/aspects/quality_gated_iterative.js`.
+- Use an evaluation loop (act -> score -> fix) until the score clears a threshold; see `.a5c/functions/score.md` and example process patterns like `.a5c/processes/development/v2/core/loops/quality_gate.js` and `.a5c/processes/development/v2/aspects/quality.js`.
 - Keep artifacts and feedback in the run directory so you can review, diff, and rerun with the same inputs and process.
 
 ## Security notes
