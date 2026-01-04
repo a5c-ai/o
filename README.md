@@ -1,6 +1,6 @@
-# o - repo-local orchestration prompt runner
+# o - Next-Generation Development Process Automation Tool - aka "Stop babysitting your agents"
 
-`o` is a small Bash runner that renders a repo-local orchestration prompt (`.a5c/o.md`) and runs it through your chosen agent CLI (`codex`, `claude-code`, `gemini`, or a `custom` runner).
+`o` is a next-generation development process automation tool. it is small but smart wrapper around your chosen agent CLI (`codex`, `claude-code`, `gemini`, or a `custom` runner) to help you and your agents follow development processes that yield high quality results.
 
 It focuses on three practical problems when using agents for real work:
 

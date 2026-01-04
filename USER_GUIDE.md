@@ -1,4 +1,6 @@
-# User Guide: `o` (orchestration agent runner)
+# User Guide: `o`
+
+`o` is a next-generation development process automation tool. it is small but smart wrapper around your chosen agent CLI (`codex`, `claude-code`, `gemini`, or a `custom` runner) to help you and your agents follow development processes that yield high quality results.
 
 `o` is a repeatable, repo-local orchestration workflow for running an AI coding agent on real codebases. It turns a request into a structured run with a consistent prompt, predictable artifacts on disk, and explicit checkpoints where you can review and steer.
 
