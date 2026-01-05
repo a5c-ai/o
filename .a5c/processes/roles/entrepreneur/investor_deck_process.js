@@ -198,5 +198,3 @@ export const investorDeckProcess = (inputs, ctx = {}) => {
 
   return { inputs, plan };
 };
-
-investorDeckProcess(globalThis.inputs ?? {}, {});
