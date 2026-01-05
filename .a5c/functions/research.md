@@ -18,6 +18,7 @@ Canonical artifact contract:
 - `title` (string, required): short, human-readable label for the need.
 - `need_statement` (string, required): the problem/need in plain language.
 - `schema_version` (string, optional): if present must be `"1.0"`; breaking changes require a version bump and backward-compat notes.
+- If `success_metrics` is present: each item MUST include `id`, `name`, `definition`, and `target`; `baseline` is optional, but if included it must be paired with `target`.
 - `links` (array, required): may be empty, but must be present to support traceability.
   - Each link object required keys: `rel` (string) and `target` (string).
   - `rel` allowed values: `"source" | "context" | "stakeholder" | "metric" | "constraint" | "related_need" | "prior_artifact" | "external"`.

@@ -6,6 +6,7 @@ export * from "./devops.js";
 export * from "./engineering.js";
 export * from "./platform_engineering.js";
 export * from "./product.js";
+export * from "./product_strategy.js";
 export * from "./project.js";
 export * from "./qa.js";
 export * from "./security.js";
@@ -21,6 +22,7 @@ import * as devops from "./devops.js";
 import * as engineering from "./engineering.js";
 import * as platformEngineering from "./platform_engineering.js";
 import * as product from "./product.js";
+import * as productStrategy from "./product_strategy.js";
 import * as project from "./project.js";
 import * as qa from "./qa.js";
 import * as security from "./security.js";
@@ -37,6 +39,7 @@ export const roleRegistry = {
   engineering,
   platform_engineering: platformEngineering,
   product,
+  product_strategy: productStrategy,
   project,
   qa,
   security,

@@ -29,6 +29,7 @@ Canonical artifact contract:
 - `type` (string, required): must be exactly `"ranking"`.
 - `schema_version` (string, optional): if present must be `"1.0"`; breaking changes require a version bump and backward-compat notes.
 - `need_id` (string, required): MUST equal the `id` of an existing Need Framing artifact provided in context.
+- `decision_record` (object, optional): a machine-readable decision log for the ranking outcome; include only when you have enough information to populate it without guessing.
 - `links` (array, required): may be empty, but must be present to support traceability; SHOULD include links to upstream artifact ids used to produce this ranking.
   - Each link object required keys: `rel` (string) and `target` (string).
   - `rel` allowed values: `"source" | "context" | "stakeholder" | "metric" | "constraint" | "related_need" | "prior_artifact" | "external"`.
@@ -36,16 +37,34 @@ Canonical artifact contract:
   - Optional link keys: `label` (string), `note` (string).
 - `candidates` (array, required): echo the evaluated candidates (by id) to make the ranking self-contained and traceable.
 - `scored_items` (array, required): per-candidate scoring breakdown aligned to the rubric.
+  - `scored_items[].dimension_scores` (array, required): MUST include exactly one entry per `rubric_used.dimensions[].key`.
   - `scored_items[].dimension_scores[].dimension_key` (string, required): a single dimension key that MUST match one of `rubric_used.dimensions[].key` (e.g., `solution_fit`).
 - `ranking.items` (array, required): ordered best-to-worst, deterministic ordering.
   - `rank` (integer, required): 1-based; MUST equal array position (index + 1).
   - `item_id` (string, required): MUST match one of the provided `candidates[].item_id`.
   - `rationale` (object, required): typed explanation for why it ranks here (no prose-only blobs).
+- `errors` (array, required): may be empty; when upstream IDs are missing/unknown, populate `errors` and keep `ranking.items` empty.
 
 Deterministic ordering:
 - Primary sort: higher `total_score_0_5` wins.
 - Tie-breaker: higher `dimension_scores[].dimension_score_0_5` for `confidence` wins.
 - Final tie-breaker: lexicographic `item_id` ascending.
+
+decision_record schema (only if present):
+- `decision_record.decision_item_id` (string, required): MUST equal `ranking.recommendation.item_id`.
+- `decision_record.alternatives` (array, required): top non-chosen alternatives considered (may be empty); MUST NOT include `decision_record.decision_item_id`.
+  - Each alternative object required keys:
+    - `item_id` (string): MUST match one of `candidates[].item_id`.
+    - `rank` (integer): MUST match that item's `ranking.items[].rank`.
+    - `total_score_0_5` (number): MUST match `scored_items[].total_score_0_5` for that item.
+    - `why_not` (array of strings): brief reasons it was not chosen.
+- `decision_record.rationale` (array of strings, required): decision-level rationale; SHOULD reference rubric dimensions/criteria explicitly.
+- `decision_record.evidence_ids` (array of strings, required): evidence IDs used (e.g., `e_...`) when available; do not invent.
+- `decision_record.assumption_ids` (array of strings, required): assumption IDs used (e.g., `a_...`) when available; do not invent.
+- `decision_record.test_ids` (array of strings, required): next-test IDs (e.g., `t_...`) when available; do not invent.
+- `decision_record.risks` (array of strings, required): key risks/tradeoffs for the decision.
+- `decision_record.recorded_at` (string, required): ISO 8601 timestamp (e.g., `"2026-01-05T13:04:05Z"`).
+- `decision_record.recorded_by` (string, required): identifier of the agent/human who recorded the decision.
 
 Canonical JSON shape (all required fields shown; any fields not listed as required above are optional):
 ```json
@@ -54,6 +73,24 @@ Canonical JSON shape (all required fields shown; any fields not listed as requir
   "type": "ranking",
   "schema_version": "1.0",
   "need_id": "need_01J0XK3D3P6F7B2Q9A9D0JQ3K1",
+  "decision_record": {
+    "decision_item_id": "con_01J0XK5B4Q2H7N9M1B6C3D8F0G",
+    "alternatives": [
+      {
+        "item_id": "con_01J0XK5B4Q2H7N9M1B6C3D8F0H",
+        "rank": 2,
+        "total_score_0_5": 4.0,
+        "why_not": ["string"]
+      }
+    ],
+    "rationale": ["string"],
+    "evidence_ids": ["e_..."],
+    "assumption_ids": ["a_..."],
+    "test_ids": ["t_..."],
+    "risks": ["string"],
+    "recorded_at": "2026-01-05T13:04:05Z",
+    "recorded_by": "product_strategy"
+  },
   "links": [
     {"rel": "prior_artifact", "target": "need_01J0XK3D3P6F7B2Q9A9D0JQ3K1", "note": "Need framing input"},
     {"rel": "prior_artifact", "target": "ch_01J0XK5B4G4R7C0V9F0Z2N7M1Q", "note": "Concept/Hypotheses input"}
@@ -62,6 +99,10 @@ Canonical JSON shape (all required fields shown; any fields not listed as requir
     {
       "item_id": "con_01J0XK5B4Q2H7N9M1B6C3D8F0G",
       "hypothesis_ids": ["hyp_01J0XK5B4J8S6D2P3W1A7M9C0R"]
+    },
+    {
+      "item_id": "con_01J0XK5B4Q2H7N9M1B6C3D8F0H",
+      "hypothesis_ids": []
     }
   ],
   "rubric_used": {
@@ -77,14 +118,70 @@ Canonical JSON shape (all required fields shown; any fields not listed as requir
     {
       "item_id": "con_01J0XK5B4Q2H7N9M1B6C3D8F0G",
       "dimension_scores": [
-	        {
-	          "dimension_key": "solution_fit",
-	          "dimension_score_0_5": 0,
-	          "criteria_scores": [{"criterion_key": "string", "score_0_5": 0, "justification": "string"}],
-	          "justification": "string"
-	        }
+        {
+          "dimension_key": "solution_fit",
+          "dimension_score_0_5": 4.0,
+          "criteria_scores": [
+            {"criterion_key": "user_value", "score_0_5": 4.0, "justification": "string"},
+            {"criterion_key": "usability", "score_0_5": 4.0, "justification": "string"}
+          ],
+          "justification": "string"
+        },
+        {
+          "dimension_key": "business_potential",
+          "dimension_score_0_5": 4.0,
+          "criteria_scores": [
+            {"criterion_key": "impact", "score_0_5": 4.0, "justification": "string"},
+            {"criterion_key": "reach", "score_0_5": 4.0, "justification": "string"}
+          ],
+          "justification": "string"
+        },
+        {
+          "dimension_key": "confidence",
+          "dimension_score_0_5": 4.0,
+          "criteria_scores": [{"criterion_key": "evidence_strength", "score_0_5": 4.0, "justification": "string"}],
+          "justification": "string"
+        }
       ],
-      "total_score_0_5": 0,
+      "total_score_0_5": 4.0,
+      "rationale": {
+        "summary": "string",
+        "pros": ["string"],
+        "cons": ["string"],
+        "key_assumptions": ["a_..."],
+        "key_evidence": ["e_..."],
+        "next_tests": ["t_..."]
+      }
+    },
+    {
+      "item_id": "con_01J0XK5B4Q2H7N9M1B6C3D8F0H",
+      "dimension_scores": [
+        {
+          "dimension_key": "solution_fit",
+          "dimension_score_0_5": 4.2,
+          "criteria_scores": [
+            {"criterion_key": "user_value", "score_0_5": 4.0, "justification": "string"},
+            {"criterion_key": "usability", "score_0_5": 4.4, "justification": "string"}
+          ],
+          "justification": "string"
+        },
+        {
+          "dimension_key": "business_potential",
+          "dimension_score_0_5": 4.2,
+          "criteria_scores": [
+            {"criterion_key": "impact", "score_0_5": 4.4, "justification": "string"},
+            {"criterion_key": "reach", "score_0_5": 4.0, "justification": "string"}
+          ],
+          "justification": "string"
+        },
+        {
+          "dimension_key": "confidence",
+          "dimension_score_0_5": 3.2,
+          "criteria_scores": [{"criterion_key": "evidence_strength", "score_0_5": 3.2, "justification": "string"}],
+          "justification": "string"
+        }
+      ],
+      "total_score_0_5": 4.0,
       "rationale": {
         "summary": "string",
         "pros": ["string"],
@@ -100,7 +197,17 @@ Canonical JSON shape (all required fields shown; any fields not listed as requir
       {
         "rank": 1,
         "item_id": "con_01J0XK5B4Q2H7N9M1B6C3D8F0G",
-        "total_score_0_5": 0,
+        "total_score_0_5": 4.0,
+        "rationale": {
+          "summary": "string",
+          "why_now": ["string"],
+          "tradeoffs": ["string"]
+        }
+      },
+      {
+        "rank": 2,
+        "item_id": "con_01J0XK5B4Q2H7N9M1B6C3D8F0H",
+        "total_score_0_5": 4.0,
         "rationale": {
           "summary": "string",
           "why_now": ["string"],
@@ -115,9 +222,7 @@ Canonical JSON shape (all required fields shown; any fields not listed as requir
     },
     "notes": ["string"]
   },
-  "errors": [
-    {"code": "UNKNOWN_ID", "message": "string"}
-  ]
+  "errors": []
 }
 ```
 
