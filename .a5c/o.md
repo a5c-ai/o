@@ -13,15 +13,19 @@ b. given a prompt for high level task (or pseudo code), and you need to create a
 - strictly follow the instructions in the code/main.js file (and imported file), and do not deviate from the process unless explicitly instructed to do so by the user.
 - when the user asks somethings that requires you to deviate from the process, you should determine whether to realign from the current state of the process, or to continue with the current state of the process, but with the changes needed to fulfill the request.
 
-- maintain helper orchestration scripts at .a5c/orchestrator_scripts/ (like append_simple_event.py, extract_first_json_object.py, extract_score_json.py, etc.) or .a5c/runs/<run_id>/orchestrator/ (if they are specific to the run). but do not create helper script for entire functions from the process, these need to be performed manually by you.
-- maintain journal at .a5c/runs/<run_id>/journal.jsonl
-- maintain state at .a5c/runs/<run_id>/state.json
+Important rules:
+- maintain helper orchestration scripts at .a5c/orchestrator_scripts/ (like append_simple_event.py, extract_first_json_object.py, extract_score_json.py, etc.) or .a5c/runs/<run_id>/orchestrator/ (if they are specific to the run). but do not create helper script for entire iterations from the process, these need to be performed or dispatched or be orchestrated by you. (manually against the journal and state)
+- maintain journal at .a5c/runs/<run_id>/journal.jsonl - ALWAYS append to the journal before and after function calls and before and after breakpoints.
+- maintain state at .a5c/runs/<run_id>/state.json - ALWAYS update the state before and after function calls and before and after breakpoints.
 - maintain prompts and work summaries at .a5c/runs/<run_id>/prompts/ and .a5c/runs/<run_id>/work_summaries/ (but make sure to tee the output so that it is visible to the user)
 - instruct the agents to place their work and artifacts in the proper files and directories in the repo (docs, specs, code, etc.). not in the run directory.
 - when reading the journal, tail it and seek through it as needed to avoid consuming too much memory to recover the state.
 - you act as a smart interpreter of the code, never actually execute the code representing the process with a real compiler/interpreter.
 - before crafting the main.js file, look through the .a5c/processes/ for common practices and patterns, and you may use them as a starting point for the main.js file. look for the most relevant process for the request, and use it as a starting point. - for example, if the process is a full project, use the full_project.js/fullstackApp process as a starting point. or if the process is a bug fix, use the full_project.js/produceFix process as a starting point. or combine varios development aspects or specializations to create a new process to fullfill the entire request.
 - always have the full process in mind (context window), so that you can always resume accurately from the current state. never prompt the user unless you hit a breakpoint or finished the entire run (keep doing orchestration iterations until the run is complete).
+- when crafting main.js file. also create and runs/<run_id>/artifacts/process.md file with descriptive content that describes the coded process in detail (including pseudo-imported files, and the process of the code/main.js file). also include a mermaid diagram that describes the process in a visual way in artifacts/process.mermaid.md file
+- never deviate from the process, if the session was compacted, reload .a5c/o.md file to remember the rules of the orchestration.
+- every few iterations, you should also reload the journal and state to check if the user added an interruption or additional comments or additional instructions to the run since you last checked, and if so, you should handle it appropriately.
 
 on every orchestration iteration, you will:
 0. read the code that represents the process. (.a5c/runs/<run_id>/code/main.js, and referenced files, that may be in the repo, and not relative to the run directory - they might be in .a5c/processes/), the state (.a5c/runs/<run_id>/state.json) and the inputs (.a5c/runs/<run_id>/inputs.json) - since they may have changed since the last iteration. (by user, or external factors)
@@ -34,10 +38,13 @@ on every orchestration iteration, you will:
 7. update the state and proceed with the next statement in the code.
 8. after the initial main.js approval (if you created it), you should never touch main.js without approval or explicit instructions from the user.
 
-to activate agents (act() or score() events that are defined in .a5c/functions/): 
+to activate agents (act(), score() md files that are defined in .a5c/functions/): 
 0. prepare the prompt for context, the task and specific agent. use .a5c/functions/act.md as the template for act, score.md as the template for score, etc.
 1. evaluate env.A5C_CLI_COMMAND and exec it with the prompt file and the work summary file destination path as inputs (e.g command: "cat <prompt_file.md> | codex exec ... -c model=gpt-5.2 > <work_summary_file.md>").
 2. read the work_summary.md file and understand the work that was done and what was the result. and how it effects the journal, state, and process.
+
+3. if the function is breakpoint, it needs a specific handling to be performed by the orchestrator, not the agents.
+4. only if the function is o(), it needs a specific handling to be performed by YOU, the orchestrator, not the agents.
 
 here is an example of a code/main.js file (in case you need to generate the code/main.js file):
 ```javascript
