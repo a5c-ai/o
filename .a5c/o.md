@@ -19,6 +19,7 @@ Important rules:
 - maintain state at .a5c/runs/<run_id>/state.json - ALWAYS update the state before and after function calls and before and after breakpoints.
 - maintain prompts and work summaries at .a5c/runs/<run_id>/prompts/ and .a5c/runs/<run_id>/work_summaries/ (but make sure to tee the output so that it is visible to the user)
 - instruct the agents to place their work and artifacts in the proper files and directories in the repo (docs, specs, code, etc.). not in the run directory.
+- maintains important artifacts of the run in runs/<run_id>/artifacts/ directory. for example: reports, diagrams, summaries, etc, generated media and documents, etc. these artifacts are important for the run and for the user to review and understand the run, but usually not the primary results of the run.
 - when reading the journal, tail it and seek through it as needed to avoid consuming too much memory to recover the state.
 - you act as a smart interpreter of the code, never actually execute the code representing the process with a real compiler/interpreter.
 - before crafting the main.js file, look through the .a5c/processes/ for common practices and patterns, and you may use them as a starting point for the main.js file. look for the most relevant process for the request, and use it as a starting point. - for example, if the process is a full project, use the full_project.js/fullstackApp process as a starting point. or if the process is a bug fix, use the full_project.js/produceFix process as a starting point. or combine varios development aspects or specializations to create a new process to fullfill the entire request.
@@ -27,10 +28,10 @@ Important rules:
 - never deviate from the process, if the session was compacted, reload .a5c/o.md file to remember the rules of the orchestration.
 - every few iterations, you should also reload the journal and state to check if the user added an interruption or additional comments or additional instructions to the run since you last checked, and if so, you should handle it appropriately.
 
-on every orchestration iteration, you will:
-0. read the code that represents the process. (.a5c/runs/<run_id>/code/main.js, and referenced files, that may be in the repo, and not relative to the run directory - they might be in .a5c/processes/), the state (.a5c/runs/<run_id>/state.json) and the inputs (.a5c/runs/<run_id>/inputs.json) - since they may have changed since the last iteration. (by user, or external factors)
+on every orchestration iteration, you have to:
+0. read the code that represents the process (or check if it was modified since the last iteration). (.a5c/runs/<run_id>/code/main.js, and referenced files, that may be in the repo, and not relative to the run directory - they might be in .a5c/processes/), the state (.a5c/runs/<run_id>/state.json) and the inputs (.a5c/runs/<run_id>/inputs.json) - since they may have changed since the last iteration. (by user, or external factors)
 1. tail the journal (.a5c/runs/<run_id>/journal.jsonl) and seek through it as needed to avoid consuming too much memory to recover the state.
-2. understand the current state (local and global) and the current statement, derived from the journal and code
+2. understand the current state (local and global) and the current statement, derived from the journal and code, as well as pointers to generated artifacts and files in the repo.
 3. understand how to act based on the code and the state
 4. act based on the code and the state (act() or score(), breakpoint(), etc.) - o() function calls should be evaluated by the orchestrator, not the agents. all the other function calls should be delegated to the agents.
 5. when breakpoint is hit, you need the prompt the user for feedback, steering of the process, or other clarification.
