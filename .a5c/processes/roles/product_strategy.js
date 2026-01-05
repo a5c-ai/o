@@ -135,6 +135,8 @@ export const ranking = (task, ctx = {}, opts = {}) => {
         "  - `alternatives` MUST contain only non-chosen alternatives (do not include `decision_item_id`).\n" +
         "  - `alternatives` MUST correspond to actual non-chosen candidates and any included `rank`/`total_score_0_5` MUST match `ranking.items`/`scored_items`.\n" +
         "- `rubric_used` MUST be explicit (scale, dimensions, aggregation) and `scored_items` MUST align to it.\n" +
+        "- `scored_items[].total_score_0_5` is REQUIRED (number).\n" +
+        "- `ranking.items[].total_score_0_5` is REQUIRED (number).\n" +
         "- `scored_items[].rationale` MUST be a typed object and SHOULD reference upstream IDs when available:\n" +
         "  - `key_assumptions`: array of `a_...` IDs (do not invent)\n" +
         "  - `key_evidence`: array of `e_...` IDs (do not invent)\n" +

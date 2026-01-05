@@ -39,10 +39,16 @@ Canonical artifact contract:
 - `scored_items` (array, required): per-candidate scoring breakdown aligned to the rubric.
   - `scored_items[].dimension_scores` (array, required): MUST include exactly one entry per `rubric_used.dimensions[].key`.
   - `scored_items[].dimension_scores[].dimension_key` (string, required): a single dimension key that MUST match one of `rubric_used.dimensions[].key` (e.g., `solution_fit`).
+  - `scored_items[].total_score_0_5` (number, required): overall score on the 0-5 scale; used for deterministic ordering.
 - `ranking.items` (array, required): ordered best-to-worst, deterministic ordering.
   - `rank` (integer, required): 1-based; MUST equal array position (index + 1).
   - `item_id` (string, required): MUST match one of the provided `candidates[].item_id`.
+  - `total_score_0_5` (number, required): MUST match the corresponding `scored_items[].total_score_0_5` for the same `item_id`.
   - `rationale` (object, required): typed explanation for why it ranks here (no prose-only blobs).
+- `ranking.recommendation` (object, required): explicit recommendation for the top choice.
+  - `item_id` (string, required): MUST match one of the provided `candidates[].item_id`.
+  - `confidence_0_1` (number, required): 0.0 to 1.0.
+  - `why` (array, required): array of strings summarizing why this is recommended.
 - `errors` (array, required): may be empty; when upstream IDs are missing/unknown, populate `errors` and keep `ranking.items` empty.
 
 Deterministic ordering:
@@ -236,11 +242,43 @@ Minimal valid example:
   "candidates": [{"item_id": "con_00000000000000000000000000", "hypothesis_ids": []}],
   "rubric_used": {
     "scale": {"min": 0, "max": 5},
-    "dimensions": [],
+    "dimensions": [{"key": "confidence", "weight": 1.0, "criteria": []}],
     "aggregation": {"method": "weighted_average", "formula": "string"}
   },
-  "scored_items": [],
-  "ranking": {"items": [], "recommendation": {"item_id": "con_00000000000000000000000000", "confidence_0_1": 0.0, "why": []}, "notes": []},
+  "scored_items": [
+    {
+      "item_id": "con_00000000000000000000000000",
+      "dimension_scores": [
+        {
+          "dimension_key": "confidence",
+          "dimension_score_0_5": 3.0,
+          "criteria_scores": [],
+          "justification": "string"
+        }
+      ],
+      "total_score_0_5": 3.0,
+      "rationale": {
+        "summary": "string",
+        "pros": [],
+        "cons": [],
+        "key_assumptions": [],
+        "key_evidence": [],
+        "next_tests": []
+      }
+    }
+  ],
+  "ranking": {
+    "items": [
+      {
+        "rank": 1,
+        "item_id": "con_00000000000000000000000000",
+        "total_score_0_5": 3.0,
+        "rationale": {"summary": "string", "why_now": [], "tradeoffs": []}
+      }
+    ],
+    "recommendation": {"item_id": "con_00000000000000000000000000", "confidence_0_1": 0.0, "why": ["string"]},
+    "notes": []
+  },
   "errors": []
 }
 ```
