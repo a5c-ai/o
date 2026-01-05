@@ -1,6 +1,6 @@
-import { runQualityGate } from "../core/loops/quality_gate.js";
-import { defaultDevelop } from "../core/primitives.js";
-import { normalizeTask } from "../core/task.js";
+import { runQualityGate } from "../../core/loops/quality_gate.js";
+import { defaultDevelop } from "../../core/primitives.js";
+import { normalizeTask } from "../../core/task.js";
 
 const gate = (task, ctx, criteria, opts = {}) =>
   runQualityGate({
