@@ -1,12 +1,13 @@
-import { breakpoint, inputs } from "@a5c/not-a-real-package";
-import { enhancement } from "./enhancement";
-import { requireAct } from "./_shared";
+import { checkpoint } from "../../../core/checkpoints.js";
+import { enhancement } from "./enhancement.js";
+import { requireAct } from "./_shared.js";
+
 const determineIterationBacklog = (ctx) => {
   const act = requireAct(ctx);
   return act(
     [
       "Review the current repo and propose a prioritized backlog for this iteration.",
-      "Return an array of items; each item should include:",
+      "Return a JSON array of items; each item should include:",
       "- title (string)",
       "- rationale (string)",
       "- domain (one of: frontend, backend, data, infra, workers, integration, sdk, package)",
@@ -15,38 +16,48 @@ const determineIterationBacklog = (ctx) => {
       "- expected_effort (one of: S, M, L)",
       "- suggested_files (array of strings; may be empty)",
       "",
-      "Bias toward UI feature-completeness, usability, and visual polish.",
-      "Prefer small, shippable items with crisp acceptance criteria."
+      "Prefer small, shippable items with crisp acceptance criteria.",
     ].join("\n"),
     ctx
   );
 };
 
-const runIteration = (context) => {
-  const backlog = determineIterationBacklog(context);
-  const items = (backlog || []).slice(0, context.items_per_iteration || 3);
+const runIteration = (ctx, opts = {}) => {
+  const act = requireAct(ctx);
 
-  breakpoint("review iteration backlog", { backlog, items }, context);
+  const backlog = determineIterationBacklog(ctx);
+  const items = Array.isArray(backlog) ? backlog.slice(0, opts.itemsPerIteration ?? 3) : [];
 
+  checkpoint("iterative_project_improvements_backlog", ctx, { backlog, items });
+
+  let nextCtx = ctx;
+  const iterationRuns = [];
   for (const item of items) {
-    context = enhancement(item, context, { domain: item.domain });
+    nextCtx = { ...nextCtx, lastIterationItem: item };
+    const result = enhancement(item, nextCtx, { domain: item.domain, quality: opts.quality });
+    iterationRuns.push({ item, result });
   }
 
-  const next = act(
+  const summary = act(
     "Summarize what changed and propose the next iteration focus (1-3 bullets).",
-    context
+    nextCtx
   );
-  breakpoint("iteration complete", next, context);
-  return context;
+  checkpoint("iterative_project_improvements_iteration_complete", nextCtx, { summary });
+
+  return { ...nextCtx, iterationRuns, summary };
 };
 
-export const iterativeProjectImprove = (context) => {
-  const maxIterations = context.max_iterations || 3;
+export const iterativeProjectImprovements = (task, ctx = {}, opts = {}) => {
+  const maxIterations = opts.maxIterations ?? 3;
+  const baseCtx = { ...ctx, task };
+
+  let current = baseCtx;
   for (let i = 1; i <= maxIterations; i++) {
-    context = runIteration({ ...context, iteration: i });
+    current = runIteration({ ...current, iteration: i }, opts);
   }
-  return context;
+
+  return current;
 };
 
-iterativeProjectImprove({ ...inputs });
+export const iterativeProjectImprove = iterativeProjectImprovements;
 

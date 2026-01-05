@@ -4,12 +4,15 @@ import * as frontend from "./frontend.js";
 import * as nextjs from "./nextjs_app.js";
 import * as backend from "./backend.js";
 import * as infra from "./infra.js";
+import * as awsCloud from "./aws_cloud.js";
 import * as awsServerless from "./aws_serverless.js";
 import * as kubernetes from "./kubernetes_service.js";
+import * as gcpCloud from "./gcp_cloud.js";
 import * as gcpCloudRun from "./gcp_cloudrun.js";
 import * as reactNative from "./react_native_app.js";
 import * as postgresDb from "./postgres_db.js";
 import * as redisCache from "./redis_cache.js";
+import * as messaging from "./messaging.js";
 import * as eventStreaming from "./event_streaming.js";
 import * as fastapiService from "./fastapi_service.js";
 import * as awsDynamodb from "./aws_dynamodb.js";
@@ -21,6 +24,7 @@ import * as springBoot from "./spring_boot_service.js";
 import * as dotnetWebapi from "./dotnet_webapi.js";
 import * as terraformModule from "./terraform_module.js";
 import * as helmChart from "./helm_chart.js";
+import * as azureCloud from "./azure_cloud.js";
 import * as azureFunctions from "./azure_functions.js";
 import * as stripeIntegration from "./stripe_integration.js";
 import * as data from "./data.js";
@@ -48,17 +52,22 @@ import * as azureServicebus from "./azure_servicebus.js";
 import * as cliTool from "./cli_tool.js";
 import { normalizeDomainName } from "../_domain_aliases.js";
 
-const packRegistry = {
+export { normalizeDomainName };
+
+export const packRegistry = {
   frontend,
   nextjs_app: nextjs,
   backend,
   infra,
+  aws_cloud: awsCloud,
   aws_serverless: awsServerless,
   kubernetes_service: kubernetes,
+  gcp_cloud: gcpCloud,
   gcp_cloudrun: gcpCloudRun,
   react_native_app: reactNative,
   postgres_db: postgresDb,
   redis_cache: redisCache,
+  messaging,
   event_streaming: eventStreaming,
   fastapi_service: fastapiService,
   aws_dynamodb: awsDynamodb,
@@ -70,6 +79,7 @@ const packRegistry = {
   dotnet_webapi: dotnetWebapi,
   terraform_module: terraformModule,
   helm_chart: helmChart,
+  azure_cloud: azureCloud,
   azure_functions: azureFunctions,
   stripe_integration: stripeIntegration,
   data,

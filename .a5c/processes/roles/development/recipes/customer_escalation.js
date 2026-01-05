@@ -1,7 +1,7 @@
-import { runQualityGate } from "../core/loops/quality_gate.js";
-import { defaultDevelop } from "../core/primitives.js";
-import { normalizeTask } from "../core/task.js";
-import * as roles from "../../roles/roles/index.js";
+import { runQualityGate } from "../../../core/loops/quality_gate.js";
+import { defaultDevelop } from "../../../core/primitives.js";
+import { normalizeTask } from "../../../core/task.js";
+import * as roles from "../../index.js";
 
 const gate = (task, ctx, criteria, opts = {}) =>
   runQualityGate({
@@ -77,4 +77,3 @@ export const customerEscalation = (task, ctx = {}, opts = {}) => {
     customerResponse,
   };
 };
-

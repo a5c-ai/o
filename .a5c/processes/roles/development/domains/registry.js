@@ -3,12 +3,15 @@ import { buildFrontendDevelop } from "./frontend.js";
 import { buildNextjsAppDevelop } from "./nextjs_app.js";
 import { buildReactNativeAppDevelop } from "./react_native_app.js";
 import { buildInfraDevelop } from "./infra.js";
+import { buildAwsCloudDevelop } from "./aws_cloud.js";
 import { buildAwsServerlessDevelop } from "./aws_serverless.js";
 import { buildAwsDynamodbDevelop } from "./aws_dynamodb.js";
 import { buildKubernetesServiceDevelop } from "./kubernetes_service.js";
+import { buildGcpCloudDevelop } from "./gcp_cloud.js";
 import { buildGcpCloudRunDevelop } from "./gcp_cloudrun.js";
 import { buildPostgresDbDevelop } from "./postgres_db.js";
 import { buildRedisCacheDevelop } from "./redis_cache.js";
+import { buildMessagingDevelop } from "./messaging.js";
 import { buildEventStreamingDevelop } from "./event_streaming.js";
 import { buildFastapiServiceDevelop } from "./fastapi_service.js";
 import { buildGraphqlApiDevelop } from "./graphql_api.js";
@@ -19,6 +22,7 @@ import { buildSpringBootServiceDevelop } from "./spring_boot_service.js";
 import { buildDotnetWebapiDevelop } from "./dotnet_webapi.js";
 import { buildTerraformModuleDevelop } from "./terraform_module.js";
 import { buildHelmChartDevelop } from "./helm_chart.js";
+import { buildAzureCloudDevelop } from "./azure_cloud.js";
 import { buildAzureFunctionsDevelop } from "./azure_functions.js";
 import { buildStripeIntegrationDevelop } from "./stripe_integration.js";
 import { buildDataDevelop } from "./data.js";
@@ -46,18 +50,23 @@ import { buildAzureServicebusDevelop } from "./azure_servicebus.js";
 import { buildCliToolDevelop } from "./cli_tool.js";
 import { normalizeDomainName } from "./_domain_aliases.js";
 
+export { normalizeDomainName };
+
 export const domainRegistry = {
   backend: buildBackendDevelop,
   frontend: buildFrontendDevelop,
   nextjs_app: buildNextjsAppDevelop,
   react_native_app: buildReactNativeAppDevelop,
   infra: buildInfraDevelop,
+  aws_cloud: buildAwsCloudDevelop,
   aws_serverless: buildAwsServerlessDevelop,
   aws_dynamodb: buildAwsDynamodbDevelop,
   kubernetes_service: buildKubernetesServiceDevelop,
+  gcp_cloud: buildGcpCloudDevelop,
   gcp_cloudrun: buildGcpCloudRunDevelop,
   postgres_db: buildPostgresDbDevelop,
   redis_cache: buildRedisCacheDevelop,
+  messaging: buildMessagingDevelop,
   event_streaming: buildEventStreamingDevelop,
   fastapi_service: buildFastapiServiceDevelop,
   graphql_api: buildGraphqlApiDevelop,
@@ -68,6 +77,7 @@ export const domainRegistry = {
   dotnet_webapi: buildDotnetWebapiDevelop,
   terraform_module: buildTerraformModuleDevelop,
   helm_chart: buildHelmChartDevelop,
+  azure_cloud: buildAzureCloudDevelop,
   azure_functions: buildAzureFunctionsDevelop,
   stripe_integration: buildStripeIntegrationDevelop,
   data: buildDataDevelop,

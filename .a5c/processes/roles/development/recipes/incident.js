@@ -1,7 +1,7 @@
-import { primitivesFrom, requirePrimitive } from "../core/primitives.js";
-import { runQualityGate } from "../core/loops/quality_gate.js";
-import { normalizeTask } from "../core/task.js";
-import * as roles from "../../roles/roles/index.js";
+import { primitivesFrom, requirePrimitive } from "../../../core/primitives.js";
+import { runQualityGate } from "../../../core/loops/quality_gate.js";
+import { normalizeTask } from "../../../core/task.js";
+import * as roles from "../../index.js";
 
 const gateArtifact = (task, ctx, criteria, opts = {}) =>
   runQualityGate({
@@ -71,4 +71,3 @@ export const incident = (task, ctx = {}, opts = {}) => {
     postmortem,
   };
 };
-
