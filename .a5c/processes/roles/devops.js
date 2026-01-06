@@ -1,6 +1,7 @@
 import { runQualityGate } from "../core/loops/quality_gate.js";
 import { defaultDevelop } from "../core/primitives.js";
 import { normalizeTask } from "../core/task.js";
+import { runRecurringForever } from "../runners/recurring.js";
 
 const gate = (task, ctx, criteria, opts = {}) =>
   runQualityGate({
@@ -114,6 +115,64 @@ export const monitorTriage = (task, ctx = {}, opts = {}) => {
     ],
     opts
   );
+};
+
+export const buildFixerWorkflow = (task, ctx = {}, opts = {}) => {
+  const input = normalizeTask(task);
+  return gate(
+    {
+      title: "Build fixer workflow (CI-agnostic)",
+      prompt:
+        "Design an execution workflow to fix failing CI builds for this repo. " +
+        "Be CI-provider agnostic: support GitHub Actions plus at least one non-GitHub CI provider (e.g., GitLab CI, Azure Pipelines, CircleCI, Jenkins). " +
+        "First, discover the CI provider using repo artifacts and record the evidence used. " +
+        "Provider heuristics (use as primary signals): " +
+        "`.github/workflows/*` => GitHub Actions; `.gitlab-ci.yml` => GitLab CI; `azure-pipelines.yml` or `azure-pipelines.yaml` => Azure Pipelines; " +
+        "`.circleci/config.yml` => CircleCI; `Jenkinsfile` => Jenkins; otherwise `unknown`. " +
+        "If `ci.provider` is GitHub Actions, use the `github()` verb template for all GitHub/Actions CLI interactions (see `.a5c/functions/github.md`) " +
+        "and do not embed ad-hoc `gh` instruction lists in prose. For non-GitHub providers, select and use the appropriate provider CLI if available " +
+        "(or fall back to provider-neutral shell + file inspection) and never force GitHub tooling. " +
+        "Output a single JSON object only (no markdown) using this provider-neutral schema (provider-specific and deprecated fields must be optional): " +
+        '{ "ci": {"provider": "github"|"gitlab"|"azure"|"circleci"|"jenkins"|"unknown", "providerReason": string, "cli": string}, "providerPrereqs": string[], "discoveryCommands": string[], "runInspection": {"identifyFailingRun": string[], "inspectRun": string[], "fetchLogs": string[], "downloadArtifacts": string[]}, "rerunCommands": string[], "localRepro": {"commands": string[], "notes": string[]}, "providerSpecific": object|null } ' +
+        "`ci.cli` must be the provider CLI tool name (e.g., `gh`, `glab`, `az`, `circleci`, `jenkins`, or `shell` if no dedicated CLI is used). " +
+        "If `ci.provider === \"github\"`, the command strings themselves must use `github()`-scoped steps; `ci.cli` should still just name the CLI (typically `gh`). " +
+        "If `ci.provider === \"github\"` and you need to include legacy GitHub-only prerequisites, you may add an optional `deprecated` object: `{ \"ghPrereqs\": string[] }`. " +
+        "Requirements: always populate `ci.provider` and `ci.providerReason`; commands must be appropriate for the chosen provider; " +
+        "GitHub-specific command entries must only appear when `ci.provider === \"github\"` and must be expressed as `github()`-scoped steps.",
+      input,
+    },
+    ctx,
+    [
+      "Provider selection is evidence-based and recorded in ci.providerReason",
+      "Output JSON schema is provider-neutral and unambiguous",
+      "GitHub Actions workflows use github() for CLI interactions; non-GitHub providers do not",
+      "Includes concrete discovery and inspection/rerun steps (or safe fallbacks)",
+    ],
+    opts
+  );
+};
+
+export const buildFixerForever = async (
+  task,
+  ctx = {},
+  {
+    intervalMs = 15 * 60 * 1000,
+    runOnce,
+    name = "build_fixer",
+    logger,
+    ...workflowOpts
+  } = {}
+) => {
+  const defaultRunOnce = async () => buildFixerWorkflow(task, ctx, workflowOpts);
+  const effectiveRunOnce =
+    typeof runOnce === "function" ? () => runOnce(task, ctx, workflowOpts) : defaultRunOnce;
+
+  return runRecurringForever({
+    name,
+    intervalMs,
+    logger,
+    runOnce: effectiveRunOnce,
+  });
 };
 
 export const infraChangePlan = (task, ctx = {}, opts = {}) => {
