@@ -15,6 +15,6 @@ export * from "./recipes/migration.js";
 export * from "./recipes/quality_gated_change.js";
 export * from "./recipes/release.js";
 export * from "./recipes/research_first.js";
+export * from "./recipes/workers_forever.js";
 
 export * from "./validate.js";
-

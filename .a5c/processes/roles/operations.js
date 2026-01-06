@@ -1,6 +1,7 @@
 import { runQualityGate } from "../core/loops/quality_gate.js";
 import { defaultDevelop } from "../core/primitives.js";
 import { normalizeTask } from "../core/task.js";
+import { sleep } from "../runners/sleep.js";
 
 const gate = (task, ctx, criteria, opts = {}) =>
   runQualityGate({
@@ -38,6 +39,69 @@ export const operatingCadence = (task, ctx = {}, opts = {}) => {
     ],
     opts
   );
+};
+
+export const opsBacklogQueueWorkerForever = async ({
+  pollBatch,
+  handleOne,
+  emptySleepMs = 10 * 60 * 1000,
+  perItemSleepMs = 0,
+  logger = console,
+} = {}) => {
+  if (typeof pollBatch !== "function") {
+    throw new Error("opsBacklogQueueWorkerForever: pollBatch must be a function");
+  }
+  if (typeof handleOne !== "function") {
+    throw new Error("opsBacklogQueueWorkerForever: handleOne must be a function");
+  }
+
+  for (;;) {
+    let items = [];
+    try {
+      items = (await pollBatch()) ?? [];
+    } catch (err) {
+      logger?.error?.("[operations] poll error", err);
+      items = [];
+    }
+
+    if (!Array.isArray(items) || items.length === 0) {
+      logger?.info?.(`[operations] backlog empty; sleeping ${emptySleepMs}ms`);
+      await sleep(emptySleepMs);
+      continue;
+    }
+
+    for (const item of items) {
+      try {
+        await handleOne(item);
+      } catch (err) {
+        logger?.error?.("[operations] handle error", err);
+      }
+
+      if (perItemSleepMs > 0) {
+        await sleep(perItemSleepMs);
+      }
+    }
+  }
+};
+
+export const opsWeeklyBusinessReviewForever = async ({
+  intervalMs = 7 * 24 * 60 * 60 * 1000,
+  runOnce,
+  logger = console,
+} = {}) => {
+  if (typeof runOnce !== "function") {
+    throw new Error("opsWeeklyBusinessReviewForever: runOnce must be a function");
+  }
+
+  for (;;) {
+    try {
+      await runOnce();
+    } catch (err) {
+      logger?.error?.("[operations] weekly review error", err);
+    }
+
+    await sleep(intervalMs);
+  }
 };
 
 export const operationalKpiTree = (task, ctx = {}, opts = {}) => {
@@ -145,4 +209,3 @@ export const execBusinessReview = (task, ctx = {}, opts = {}) => {
     opts
   );
 };
-

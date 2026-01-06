@@ -1,6 +1,7 @@
 import { runQualityGate } from "../core/loops/quality_gate.js";
 import { defaultDevelop } from "../core/primitives.js";
 import { normalizeTask } from "../core/task.js";
+import { sleep } from "../runners/sleep.js";
 
 const gate = (task, ctx, criteria, opts = {}) =>
   runQualityGate({
@@ -137,4 +138,24 @@ export const pipelineDailyHabitsChecklist = (task, ctx = {}, opts = {}) => {
     ],
     opts
   );
+};
+
+export const salesPipelineHygieneForever = async ({
+  intervalMs = 24 * 60 * 60 * 1000,
+  runOnce,
+  logger = console,
+} = {}) => {
+  if (typeof runOnce !== "function") {
+    throw new Error("salesPipelineHygieneForever: runOnce must be a function");
+  }
+
+  for (;;) {
+    try {
+      await runOnce();
+    } catch (err) {
+      logger?.error?.("[sales_execution] hygiene loop error", err);
+    }
+
+    await sleep(intervalMs);
+  }
 };

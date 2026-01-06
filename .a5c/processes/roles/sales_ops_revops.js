@@ -1,6 +1,7 @@
 import { runQualityGate } from "../core/loops/quality_gate.js";
 import { defaultDevelop } from "../core/primitives.js";
 import { normalizeTask } from "../core/task.js";
+import { sleep } from "../runners/sleep.js";
 
 const gate = (task, ctx, criteria, opts = {}) =>
   runQualityGate({
@@ -51,6 +52,69 @@ export const leadRoutingAndSla = (task, ctx = {}, opts = {}) => {
     ],
     opts
   );
+};
+
+export const leadRoutingQueueWorkerForever = async ({
+  pollBatch,
+  handleOne,
+  emptySleepMs = 10 * 60 * 1000,
+  perItemSleepMs = 0,
+  logger = console,
+} = {}) => {
+  if (typeof pollBatch !== "function") {
+    throw new Error("leadRoutingQueueWorkerForever: pollBatch must be a function");
+  }
+  if (typeof handleOne !== "function") {
+    throw new Error("leadRoutingQueueWorkerForever: handleOne must be a function");
+  }
+
+  for (;;) {
+    let leads = [];
+    try {
+      leads = (await pollBatch()) ?? [];
+    } catch (err) {
+      logger?.error?.("[sales_ops_revops] poll error", err);
+      leads = [];
+    }
+
+    if (!Array.isArray(leads) || leads.length === 0) {
+      logger?.info?.(`[sales_ops_revops] no leads; sleeping ${emptySleepMs}ms`);
+      await sleep(emptySleepMs);
+      continue;
+    }
+
+    for (const lead of leads) {
+      try {
+        await handleOne(lead);
+      } catch (err) {
+        logger?.error?.("[sales_ops_revops] handle error", err);
+      }
+
+      if (perItemSleepMs > 0) {
+        await sleep(perItemSleepMs);
+      }
+    }
+  }
+};
+
+export const revenueDataReconciliationForever = async ({
+  intervalMs = 24 * 60 * 60 * 1000,
+  runOnce,
+  logger = console,
+} = {}) => {
+  if (typeof runOnce !== "function") {
+    throw new Error("revenueDataReconciliationForever: runOnce must be a function");
+  }
+
+  for (;;) {
+    try {
+      await runOnce();
+    } catch (err) {
+      logger?.error?.("[sales_ops_revops] reconciliation error", err);
+    }
+
+    await sleep(intervalMs);
+  }
 };
 
 export const forecastProcess = (task, ctx = {}, opts = {}) => {
@@ -132,4 +196,3 @@ export const revReportingSpec = (task, ctx = {}, opts = {}) => {
     opts
   );
 };
-

@@ -7,6 +7,7 @@ export * from "./design.js";
 export * from "./devops.js";
 export * from "./engineering.js";
 export * from "./go_to_market.js";
+export * from "./meta.js";
 export * from "./operations.js";
 export * from "./process_automation.js";
 export * from "./procurement_ops.js";
@@ -43,6 +44,7 @@ import * as design from "./design.js";
 import * as devops from "./devops.js";
 import * as engineering from "./engineering.js";
 import * as goToMarket from "./go_to_market.js";
+import * as meta from "./meta.js";
 import * as operations from "./operations.js";
 import * as processAutomation from "./process_automation.js";
 import * as procurementOps from "./procurement_ops.js";
@@ -80,6 +82,7 @@ export const roleRegistry = {
   devops,
   engineering,
   go_to_market: goToMarket,
+  meta,
   operations,
   process_automation: processAutomation,
   procurement_ops: procurementOps,

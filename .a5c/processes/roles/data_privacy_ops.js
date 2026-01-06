@@ -1,6 +1,7 @@
 import { runQualityGate } from "../core/loops/quality_gate.js";
 import { defaultDevelop } from "../core/primitives.js";
 import { normalizeTask } from "../core/task.js";
+import { sleep } from "../runners/sleep.js";
 
 const gate = (task, ctx, criteria, opts = {}) =>
   runQualityGate({
@@ -74,4 +75,67 @@ export const cookieConsentOpsChecklist = (task, ctx = {}, opts = {}) => {
     ],
     opts
   );
+};
+
+export const dsarQueueWorkerForever = async ({
+  pollBatch,
+  handleOne,
+  emptySleepMs = 10 * 60 * 1000,
+  perItemSleepMs = 0,
+  logger = console,
+} = {}) => {
+  if (typeof pollBatch !== "function") {
+    throw new Error("dsarQueueWorkerForever: pollBatch must be a function");
+  }
+  if (typeof handleOne !== "function") {
+    throw new Error("dsarQueueWorkerForever: handleOne must be a function");
+  }
+
+  for (;;) {
+    let requests = [];
+    try {
+      requests = (await pollBatch()) ?? [];
+    } catch (err) {
+      logger?.error?.("[data_privacy_ops] poll error", err);
+      requests = [];
+    }
+
+    if (!Array.isArray(requests) || requests.length === 0) {
+      logger?.info?.(`[data_privacy_ops] no DSARs; sleeping ${emptySleepMs}ms`);
+      await sleep(emptySleepMs);
+      continue;
+    }
+
+    for (const req of requests) {
+      try {
+        await handleOne(req);
+      } catch (err) {
+        logger?.error?.("[data_privacy_ops] handle error", err);
+      }
+
+      if (perItemSleepMs > 0) {
+        await sleep(perItemSleepMs);
+      }
+    }
+  }
+};
+
+export const retentionDeletionAuditForever = async ({
+  intervalMs = 30 * 24 * 60 * 60 * 1000,
+  runOnce,
+  logger = console,
+} = {}) => {
+  if (typeof runOnce !== "function") {
+    throw new Error("retentionDeletionAuditForever: runOnce must be a function");
+  }
+
+  for (;;) {
+    try {
+      await runOnce();
+    } catch (err) {
+      logger?.error?.("[data_privacy_ops] retention/deletion audit error", err);
+    }
+
+    await sleep(intervalMs);
+  }
 };

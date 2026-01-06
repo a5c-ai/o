@@ -1,6 +1,7 @@
 import { runQualityGate } from "../core/loops/quality_gate.js";
 import { defaultDevelop } from "../core/primitives.js";
 import { normalizeTask } from "../core/task.js";
+import { sleep } from "../runners/sleep.js";
 
 const gate = (task, ctx, criteria, opts = {}) =>
   runQualityGate({
@@ -53,6 +54,69 @@ export const threatModel = (task, ctx = {}, opts = {}) => {
     ],
     opts
   );
+};
+
+export const vulnTriageQueueWorkerForever = async ({
+  pollBatch,
+  handleOne,
+  emptySleepMs = 10 * 60 * 1000,
+  perItemSleepMs = 0,
+  logger = console,
+} = {}) => {
+  if (typeof pollBatch !== "function") {
+    throw new Error("vulnTriageQueueWorkerForever: pollBatch must be a function");
+  }
+  if (typeof handleOne !== "function") {
+    throw new Error("vulnTriageQueueWorkerForever: handleOne must be a function");
+  }
+
+  for (;;) {
+    let vulns = [];
+    try {
+      vulns = (await pollBatch()) ?? [];
+    } catch (err) {
+      logger?.error?.("[security] poll error", err);
+      vulns = [];
+    }
+
+    if (!Array.isArray(vulns) || vulns.length === 0) {
+      logger?.info?.(`[security] no vulns; sleeping ${emptySleepMs}ms`);
+      await sleep(emptySleepMs);
+      continue;
+    }
+
+    for (const vuln of vulns) {
+      try {
+        await handleOne(vuln);
+      } catch (err) {
+        logger?.error?.("[security] handle error", err);
+      }
+
+      if (perItemSleepMs > 0) {
+        await sleep(perItemSleepMs);
+      }
+    }
+  }
+};
+
+export const securityControlMonitoringForever = async ({
+  intervalMs = 24 * 60 * 60 * 1000,
+  runOnce,
+  logger = console,
+} = {}) => {
+  if (typeof runOnce !== "function") {
+    throw new Error("securityControlMonitoringForever: runOnce must be a function");
+  }
+
+  for (;;) {
+    try {
+      await runOnce();
+    } catch (err) {
+      logger?.error?.("[security] control monitoring error", err);
+    }
+
+    await sleep(intervalMs);
+  }
 };
 
 export const securityReview = (task, ctx = {}, opts = {}) => {

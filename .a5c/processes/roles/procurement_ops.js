@@ -1,6 +1,7 @@
 import { runQualityGate } from "../core/loops/quality_gate.js";
 import { defaultDevelop } from "../core/primitives.js";
 import { normalizeTask } from "../core/task.js";
+import { sleep } from "../runners/sleep.js";
 
 const gate = (task, ctx, criteria, opts = {}) =>
   runQualityGate({
@@ -166,4 +167,47 @@ export const vendorInvoiceExceptionRunbook = (task, ctx = {}, opts = {}) => {
     ],
     opts
   );
+};
+
+export const procurementIntakeQueueWorkerForever = async ({
+  pollBatch,
+  handleOne,
+  emptySleepMs = 10 * 60 * 1000,
+  perItemSleepMs = 0,
+  logger = console,
+} = {}) => {
+  if (typeof pollBatch !== "function") {
+    throw new Error("procurementIntakeQueueWorkerForever: pollBatch must be a function");
+  }
+  if (typeof handleOne !== "function") {
+    throw new Error("procurementIntakeQueueWorkerForever: handleOne must be a function");
+  }
+
+  for (;;) {
+    let items = [];
+    try {
+      items = (await pollBatch()) ?? [];
+    } catch (err) {
+      logger?.error?.("[procurement_ops] poll error", err);
+      items = [];
+    }
+
+    if (!Array.isArray(items) || items.length === 0) {
+      logger?.info?.(`[procurement_ops] queue empty; sleeping ${emptySleepMs}ms`);
+      await sleep(emptySleepMs);
+      continue;
+    }
+
+    for (const item of items) {
+      try {
+        await handleOne(item);
+      } catch (err) {
+        logger?.error?.("[procurement_ops] handle error", err);
+      }
+
+      if (perItemSleepMs > 0) {
+        await sleep(perItemSleepMs);
+      }
+    }
+  }
 };

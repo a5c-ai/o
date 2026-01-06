@@ -1,6 +1,7 @@
 import { runQualityGate } from "../core/loops/quality_gate.js";
 import { defaultDevelop } from "../core/primitives.js";
 import { normalizeTask } from "../core/task.js";
+import { sleep } from "../runners/sleep.js";
 
 const gate = (task, ctx, criteria, opts = {}) =>
   runQualityGate({
@@ -51,6 +52,69 @@ export const healthScoreModel = (task, ctx = {}, opts = {}) => {
     ],
     opts
   );
+};
+
+export const customerHealthMonitorForever = async ({
+  intervalMs = 24 * 60 * 60 * 1000,
+  runOnce,
+  logger = console,
+} = {}) => {
+  if (typeof runOnce !== "function") {
+    throw new Error("customerHealthMonitorForever: runOnce must be a function");
+  }
+
+  for (;;) {
+    try {
+      await runOnce();
+    } catch (err) {
+      logger?.error?.("[customer_success] health monitor error", err);
+    }
+
+    await sleep(intervalMs);
+  }
+};
+
+export const csRenewalQueueWorkerForever = async ({
+  pollBatch,
+  handleOne,
+  emptySleepMs = 10 * 60 * 1000,
+  perItemSleepMs = 0,
+  logger = console,
+} = {}) => {
+  if (typeof pollBatch !== "function") {
+    throw new Error("csRenewalQueueWorkerForever: pollBatch must be a function");
+  }
+  if (typeof handleOne !== "function") {
+    throw new Error("csRenewalQueueWorkerForever: handleOne must be a function");
+  }
+
+  for (;;) {
+    let renewals = [];
+    try {
+      renewals = (await pollBatch()) ?? [];
+    } catch (err) {
+      logger?.error?.("[customer_success] poll error", err);
+      renewals = [];
+    }
+
+    if (!Array.isArray(renewals) || renewals.length === 0) {
+      logger?.info?.(`[customer_success] no renewals; sleeping ${emptySleepMs}ms`);
+      await sleep(emptySleepMs);
+      continue;
+    }
+
+    for (const renewal of renewals) {
+      try {
+        await handleOne(renewal);
+      } catch (err) {
+        logger?.error?.("[customer_success] handle error", err);
+      }
+
+      if (perItemSleepMs > 0) {
+        await sleep(perItemSleepMs);
+      }
+    }
+  }
 };
 
 export const successPlan = (task, ctx = {}, opts = {}) => {

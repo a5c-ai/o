@@ -1,6 +1,7 @@
 import { runQualityGate } from "../core/loops/quality_gate.js";
 import { defaultDevelop } from "../core/primitives.js";
 import { normalizeTask } from "../core/task.js";
+import { sleep } from "../runners/sleep.js";
 
 const gate = (task, ctx, criteria, opts = {}) =>
   runQualityGate({
@@ -51,6 +52,69 @@ export const channelStrategy = (task, ctx = {}, opts = {}) => {
     ],
     opts
   );
+};
+
+export const growthExperimentQueueWorkerForever = async ({
+  pollBatch,
+  handleOne,
+  emptySleepMs = 10 * 60 * 1000,
+  perItemSleepMs = 0,
+  logger = console,
+} = {}) => {
+  if (typeof pollBatch !== "function") {
+    throw new Error("growthExperimentQueueWorkerForever: pollBatch must be a function");
+  }
+  if (typeof handleOne !== "function") {
+    throw new Error("growthExperimentQueueWorkerForever: handleOne must be a function");
+  }
+
+  for (;;) {
+    let items = [];
+    try {
+      items = (await pollBatch()) ?? [];
+    } catch (err) {
+      logger?.error?.("[marketing_growth] poll error", err);
+      items = [];
+    }
+
+    if (!Array.isArray(items) || items.length === 0) {
+      logger?.info?.(`[marketing_growth] no experiments; sleeping ${emptySleepMs}ms`);
+      await sleep(emptySleepMs);
+      continue;
+    }
+
+    for (const item of items) {
+      try {
+        await handleOne(item);
+      } catch (err) {
+        logger?.error?.("[marketing_growth] handle error", err);
+      }
+
+      if (perItemSleepMs > 0) {
+        await sleep(perItemSleepMs);
+      }
+    }
+  }
+};
+
+export const growthNorthStarReviewForever = async ({
+  intervalMs = 7 * 24 * 60 * 60 * 1000,
+  runOnce,
+  logger = console,
+} = {}) => {
+  if (typeof runOnce !== "function") {
+    throw new Error("growthNorthStarReviewForever: runOnce must be a function");
+  }
+
+  for (;;) {
+    try {
+      await runOnce();
+    } catch (err) {
+      logger?.error?.("[marketing_growth] weekly review error", err);
+    }
+
+    await sleep(intervalMs);
+  }
 };
 
 export const lifecycleMessagingPlan = (task, ctx = {}, opts = {}) => {
@@ -132,4 +196,3 @@ export const attributionMeasurementPlan = (task, ctx = {}, opts = {}) => {
     opts
   );
 };
-

@@ -1,6 +1,7 @@
 import { runQualityGate } from "../core/loops/quality_gate.js";
 import { defaultDevelop } from "../core/primitives.js";
 import { normalizeTask } from "../core/task.js";
+import { sleep } from "../runners/sleep.js";
 
 const gate = (task, ctx, criteria, opts = {}) =>
   runQualityGate({
@@ -160,4 +161,47 @@ export const recurringComplianceCadenceTemplate = (task, ctx = {}, opts = {}) =>
     ],
     opts
   );
+};
+
+export const auditEvidenceQueueWorkerForever = async ({
+  pollBatch,
+  handleOne,
+  emptySleepMs = 10 * 60 * 1000,
+  perItemSleepMs = 0,
+  logger = console,
+} = {}) => {
+  if (typeof pollBatch !== "function") {
+    throw new Error("auditEvidenceQueueWorkerForever: pollBatch must be a function");
+  }
+  if (typeof handleOne !== "function") {
+    throw new Error("auditEvidenceQueueWorkerForever: handleOne must be a function");
+  }
+
+  for (;;) {
+    let requests = [];
+    try {
+      requests = (await pollBatch()) ?? [];
+    } catch (err) {
+      logger?.error?.("[compliance_ops] poll error", err);
+      requests = [];
+    }
+
+    if (!Array.isArray(requests) || requests.length === 0) {
+      logger?.info?.(`[compliance_ops] no pending audit requests; sleeping ${emptySleepMs}ms`);
+      await sleep(emptySleepMs);
+      continue;
+    }
+
+    for (const req of requests) {
+      try {
+        await handleOne(req);
+      } catch (err) {
+        logger?.error?.("[compliance_ops] handle error", err);
+      }
+
+      if (perItemSleepMs > 0) {
+        await sleep(perItemSleepMs);
+      }
+    }
+  }
 };
