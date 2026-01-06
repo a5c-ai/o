@@ -105,3 +105,44 @@ export const marketingDataQualityAudit = (task, ctx = {}, opts = {}) => {
   );
 };
 
+export const utmGovernanceAuditRunbook = (task, ctx = {}, opts = {}) => {
+  const input = normalizeTask(task);
+  return gate(
+    {
+      title: "UTM governance audit runbook",
+      prompt:
+        "Create a UTM governance audit runbook: what to audit, how to sample, how to detect bad UTMs, remediation workflow, and ongoing enforcement. " +
+        "Keep it operational (systems/owners/checklists) and compatible with the existing campaign taxonomy. Output JSON only. Output JSON: " +
+        '{ "asOf": string, "scope": {"channels": string[], "regions": string[], "surfaces": string[], "timeWindow": string}, "standards": {"requiredParams": string[], "allowedValuesWhere": string, "namingRules": string[], "builderOrGenerator": {"where": string, "whoCanCreate": string[], "approvalIfNewValue": string}}, "audit": {"cadence": "weekly"|"monthly"|"quarterly", "samplingPlan": {"howSelected": string, "sampleSize": number, "acceptanceCriteria": string[]}, "checks": [{"check": string, "how": string, "severity": "low"|"medium"|"high", "threshold": string|null, "ownerRole": string}]}, "detection": {"automations": [{"where": string, "rule": string, "failureHandling": string}], "dashboards": [{"name": string, "system": string, "tiles": string[]}], "alerts": [{"trigger": string, "severity": "low"|"medium"|"high", "routeToRole": string, "responseSla": string}]}, "remediationWorkflow": [{"step": string, "ownerRole": string, "sla": string, "inputs": string[], "outputs": string[], "systemOfRecord": string}], "exceptionHandling": {"whenAllowed": string[], "approvalRoles": string[], "howDocumented": string, "expiryPolicy": string}, "metrics": [{"metric": string, "definition": string, "target": string|null, "cadence": string}], "openQuestions": string[] }',
+      input,
+    },
+    ctx,
+    [
+      "Runbook defines enforceable standards plus a concrete audit cadence with sampling, checks, and owners",
+      "Detection includes automations, dashboards, and alert routing with response SLAs to prevent repeated drift",
+      "Remediation and exceptions are operational (system-of-record, approvals, expiry) and drive measurable improvement",
+    ],
+    opts
+  );
+};
+
+export const formAndLandingPageQaChecklist = (task, ctx = {}, opts = {}) => {
+  const input = normalizeTask(task);
+  return gate(
+    {
+      title: "Form and landing page QA checklist",
+      prompt:
+        "Create a form and landing page QA checklist for marketing ops: tracking, consent, routing, spam protection, analytics validation, accessibility basics, and rollback. " +
+        "Keep it operational and implementable with owners, systems of record, and definition of done; do not write copy. Output JSON only. Output JSON: " +
+        '{ "asOf": string, "scope": {"surfaces": string[], "regions": string[], "formPlatforms": string[], "cms": string|null, "mapOrCrm": string[]}, "preLaunch": [{"check": string, "ownerRole": string, "howToVerify": string, "definitionOfDone": string, "systemOfRecord": string}], "trackingAndAttribution": {"requiredEvents": string[], "utmHandling": string, "pixelOrServerSideTracking": string, "validationSteps": string[]}, "consentAndPrivacy": {"requiredChecks": string[], "regionNotes": [{"region": string, "notes": string}], "auditTrailWhere": string}, "dataAndRouting": {"fieldMappingChecks": string[], "dedupeChecks": string[], "leadRoutingOrHandoffChecks": string[], "failureModes": [{"failure": string, "symptoms": string[], "fix": string}]}, "spamAndAbuseProtection": {"controls": string[], "monitoring": string[], "thresholds": string[]}, "postLaunch": {"monitoringWindow": string, "checks": [{"check": string, "cadence": string, "ownerRole": string, "failureAction": string}], "rollbackPlan": {"triggers": string[], "steps": string[]}}, "openQuestions": string[] }',
+      input,
+    },
+    ctx,
+    [
+      "Checklist is runnable with concrete verification steps, owners, definition of done, and systems of record",
+      "Covers tracking/attribution, consent, and routing/field mapping so leads are reliable and compliant",
+      "Post-launch monitoring and rollback plan reduce risk from production form/LP changes",
+    ],
+    opts
+  );
+};

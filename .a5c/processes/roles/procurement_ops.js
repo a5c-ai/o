@@ -126,3 +126,44 @@ export const renewalAndContractCalendarProcess = (task, ctx = {}, opts = {}) => 
   );
 };
 
+export const vendorOffboardingRunbook = (task, ctx = {}, opts = {}) => {
+  const input = normalizeTask(task);
+  return gate(
+    {
+      title: "Vendor offboarding runbook",
+      prompt:
+        "Create a vendor offboarding runbook that covers commercial closeout, access removal, data return/deletion, continuity planning, and evidence retention. " +
+        "Keep it operational (owners, systems of record, checklists, and escalation). Do not draft contract language. Output JSON only. Output JSON: " +
+        '{ "asOf": string, "vendor": {"name": string, "category": string, "serviceProvided": string, "contractEndDate": string|null, "noticePeriod": string|null}, "prework": {"decisionRationale": string, "replacementPlan": string, "timelineAssumptions": string[]}, "checklists": [{"phase": "plan"|"execute"|"verify"|"closeout", "items": [{"item": string, "ownerRole": string, "systemOfRecord": string, "definitionOfDone": string, "evidenceToAttach": string[]}]}], "accessAndSecurity": {"systemsToDeprovision": [{"system": string, "whoOwns": string, "steps": string[], "evidence": string}], "dataHandling": {"dataTypes": string[], "returnOrDeletionMethod": string, "verification": string[], "certificateOfDestructionNeeded": boolean}}, "financialCloseout": {"finalInvoiceHandling": string, "creditsOrRefunds": string, "poCloseout": string, "accrualsOrAccountingNotes": string}, "comms": {"internalStakeholders": string[], "vendorCommsTemplate": string, "customerImpactCommsWhenNeeded": string}, "risksAndMitigations": [{"risk": string, "impact": string, "mitigation": string, "ownerRole": string}], "escalation": [{"trigger": string, "toRoles": string[], "within": string, "action": string}], "systemsOfRecord": [{"area": "contracts"|"tickets"|"vendor_master"|"security_grc"|"finance"|"docs"|"other", "system": string, "where": string}], "definitionOfDone": string[], "openQuestions": string[] }',
+      input,
+    },
+    ctx,
+    [
+      "Runbook covers access deprovisioning and data handling with verification/evidence so offboarding is audit-friendly",
+      "Includes phased checklists with owners and systems of record for continuity and accountability",
+      "Financial closeout, comms, and escalation paths are explicit to avoid missed invoices, credits, or risk gaps",
+    ],
+    opts
+  );
+};
+
+export const vendorInvoiceExceptionRunbook = (task, ctx = {}, opts = {}) => {
+  const input = normalizeTask(task);
+  return gate(
+    {
+      title: "Vendor invoice exception runbook",
+      prompt:
+        "Create a runbook for handling vendor invoice exceptions (missing PO, price mismatch, overage, duplicate invoice, tax issues, non-compliant vendor info). " +
+        "Include triage, routing, evidence requirements, approvals, escalation, and systems of record. Output JSON only. Output JSON: " +
+        '{ "asOf": string, "scope": {"invoiceTypes": string[], "systems": {"ap": string, "procurement": string|null, "contractRepo": string|null, "ticketing": string|null}}, "exceptionTypes": [{"type": "missing_po"|"price_mismatch"|"duplicate"|"overage"|"tax_issue"|"vendor_master_data"|"non_compliant"|"other", "definition": string, "severity": "low"|"medium"|"high", "defaultRouting": string, "requiredEvidence": string[]}], "triage": {"firstResponseSla": string, "steps": [{"step": string, "ownerRole": string, "decision": string, "next": string}]}, "workflows": [{"exceptionType": string, "workflow": [{"step": string, "ownerRole": string, "sla": string, "inputs": string[], "outputs": string[], "systemOfRecord": string}]}], "approvalMatrix": [{"decision": string, "threshold": string, "approverRoles": string[]}], "controls": {"fraudChecks": string[], "threeWayMatchPolicy": string, "auditTrailFields": string[]}, "escalations": [{"trigger": string, "toRole": string, "within": string, "action": string}], "metrics": [{"metric": string, "definition": string, "target": string|null, "cadence": string}], "openQuestions": string[] }',
+      input,
+    },
+    ctx,
+    [
+      "Exception types are well-defined with routing and required evidence so triage is fast and consistent",
+      "Workflows specify owners, SLAs, systems of record, approvals, and audit trail fields to support controls",
+      "Escalations and metrics drive continuous improvement and reduce stuck invoices/late payments",
+    ],
+    opts
+  );
+};

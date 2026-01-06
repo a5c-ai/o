@@ -1,6 +1,8 @@
 export * from "./analytics.js";
+export * from "./billing_collections_ops.js";
 export * from "./data_engineering.js";
 export * from "./data_science.js";
+export * from "./data_privacy_ops.js";
 export * from "./design.js";
 export * from "./devops.js";
 export * from "./engineering.js";
@@ -24,6 +26,7 @@ export * from "./sales_execution.js";
 export * from "./lead_gen.js";
 export * from "./support.js";
 export * from "./support_ops.js";
+export * from "./vendor_management.js";
 export * from "./marketing_ops.js";
 export * from "./marketing_growth.js";
 export * from "./technical_writing.js";
@@ -31,8 +34,10 @@ export * as development from "./development/index.js";
 export * as entrepreneur from "./entrepreneur/index.js";
 
 import * as analytics from "./analytics.js";
+import * as billingCollectionsOps from "./billing_collections_ops.js";
 import * as dataEngineering from "./data_engineering.js";
 import * as dataScience from "./data_science.js";
+import * as dataPrivacyOps from "./data_privacy_ops.js";
 import * as design from "./design.js";
 import * as devops from "./devops.js";
 import * as engineering from "./engineering.js";
@@ -56,6 +61,7 @@ import * as salesExecution from "./sales_execution.js";
 import * as leadGen from "./lead_gen.js";
 import * as support from "./support.js";
 import * as supportOps from "./support_ops.js";
+import * as vendorManagement from "./vendor_management.js";
 import * as marketingOps from "./marketing_ops.js";
 import * as marketingGrowth from "./marketing_growth.js";
 import * as technicalWriting from "./technical_writing.js";
@@ -64,8 +70,10 @@ import * as entrepreneur from "./entrepreneur/index.js";
 
 export const roleRegistry = {
   analytics,
+  billing_collections_ops: billingCollectionsOps,
   data_engineering: dataEngineering,
   data_science: dataScience,
+  data_privacy_ops: dataPrivacyOps,
   design,
   devops,
   engineering,
@@ -89,6 +97,7 @@ export const roleRegistry = {
   lead_gen: leadGen,
   support,
   support_ops: supportOps,
+  vendor_management: vendorManagement,
   marketing_ops: marketingOps,
   marketing_growth: marketingGrowth,
   technical_writing: technicalWriting,

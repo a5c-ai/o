@@ -96,3 +96,68 @@ export const policyAttestationAndTrainingProgram = (task, ctx = {}, opts = {}) =
     opts
   );
 };
+
+export const auditPbcTrackerSpec = (task, ctx = {}, opts = {}) => {
+  const input = normalizeTask(task);
+  return gate(
+    {
+      title: "Audit PBC tracker spec",
+      prompt:
+        "Create a PBC (prepared-by-client) tracker spec for an audit: requests, owners, due dates, evidence links, QA, and escalation. " +
+        "Focus on operational tracking and auditability; do not draft audit narrative. " +
+        "Output JSON only (no markdown, no extra keys). Output JSON: " +
+        '{ "asOf": string, "audit": {"framework": string, "period": string, "auditor": string|null}, "requests": [{"id": string, "area": string, "request": string, "ownerRole": string, "systemsOfRecord": string[], "due": string, "status": "not_started"|"in_progress"|"blocked"|"ready"|"submitted", "evidenceLinks": string[], "qaChecks": string[], "blockers": string[], "escalation": {"when": string, "to": string[], "messageTemplate": string}}], "cadence": {"standup": string, "statusReport": {"audience": string[], "templateSections": string[]}}, "metrics": {"onTimePctTarget": string, "qaPassTarget": string}, "openQuestions": string[] }',
+      input,
+    },
+    ctx,
+    [
+      "Requests are normalized into an operational tracker with owners, due dates, systems of record, and evidence links",
+      "QA checks and escalation paths are explicit so the tracker drives on-time, auditor-ready submissions",
+      "Cadence and metrics make progress measurable (on-time and QA pass targets)",
+    ],
+    opts
+  );
+};
+
+export const accessReviewAndSodControlRunbook = (task, ctx = {}, opts = {}) => {
+  const input = normalizeTask(task);
+  return gate(
+    {
+      title: "Access review and SoD control runbook",
+      prompt:
+        "Define an access review + segregation-of-duties (SoD) control runbook: systems, reviewers, evidence, exceptions, and renewal cadence. " +
+        "Output JSON only (no markdown, no extra keys). Output JSON: " +
+        '{ "asOf": string, "systems": [{"system": string, "ownerRole": string, "reviewCadence": string, "roles": [{"role": string, "whoShouldHave": string[], "approval": string[], "sodConflicts": string[]}], "evidence": {"whereStored": string, "fields": string[]}}], "process": {"steps": [{"step": string, "ownerRole": string, "dueRule": string, "inputs": string[], "outputs": string[]}], "exceptions": {"whenAllowed": string[], "approvalRoles": string[], "expiry": string, "howTracked": string}}, "controls": {"qaChecks": string[], "auditTrail": string[]}, "metrics": {"reviewCompletionTarget": string, "exceptionExpiryComplianceTarget": string}, "openQuestions": string[] }',
+      input,
+    },
+    ctx,
+    [
+      "Runbook is runnable: clear steps, due rules, and evidence fields per system and role set",
+      "Exceptions are governed (approval roles, expiry, tracking) and show up in audit trail and metrics",
+      "QA checks ensure the review is verifiable and consistent across cycles",
+    ],
+    opts
+  );
+};
+
+export const recurringComplianceCadenceTemplate = (task, ctx = {}, opts = {}) => {
+  const input = normalizeTask(task);
+  return gate(
+    {
+      title: "Recurring compliance cadence template",
+      prompt:
+        "Create a recurring compliance operating cadence template (daily/weekly/monthly/quarterly) as schedule + checklists + alerts. " +
+        "Do NOT write code loops or sleep; this is a template/spec only. " +
+        "Output JSON only (no markdown, no extra keys). Output JSON: " +
+        '{ "asOf": string, "cadence": [{"frequency": "daily"|"weekly"|"monthly"|"quarterly", "meeting": {"name": string, "attendees": string[], "agenda": string[], "inputs": string[], "outputs": string[]}, "checklists": [{"name": string, "items": [{"item": string, "ownerRole": string, "definitionOfDone": string, "systemOfRecord": string}]}], "alerts": [{"trigger": string, "severity": "low"|"medium"|"high", "ownerRole": string, "action": string}]}], "kpis": [{"name": string, "definition": string, "target": string, "cadence": string}], "openQuestions": string[] }',
+      input,
+    },
+    ctx,
+    [
+      "Cadence is explicit and actionable (meetings, checklists, inputs/outputs, owners, and systems of record)",
+      "Alerts and KPIs make the cadence operationally enforceable (not just a calendar)",
+      "Template avoids any runtime loops/sleeps and remains a pure schedule spec",
+    ],
+    opts
+  );
+};

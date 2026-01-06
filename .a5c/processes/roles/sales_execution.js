@@ -97,3 +97,44 @@ export const callCoachingScorecard = (task, ctx = {}, opts = {}) => {
   );
 };
 
+export const mutualActionPlanBuilder = (task, ctx = {}, opts = {}) => {
+  const input = normalizeTask(task);
+  return gate(
+    {
+      title: "Mutual action plan (MAP) builder",
+      prompt:
+        "Build a mutual action plan (MAP) for a B2B deal that is calendar-ready and jointly owned. Include milestones, owners, definitions of done, dependencies, and stakeholder engagement plan. " +
+        "Keep it deal-execution scoped (no pricing strategy, no CRM schema redesign). Output JSON only. Output JSON: " +
+        '{ "asOf": string, "dealContext": {"account": string, "dealName": string|null, "amount": string|null, "targetCloseDate": string|null, "useCase": string, "whyNow": string, "stage": string|null}, "northStarOutcome": string, "timeline": [{"milestoneId": string, "milestone": string, "targetDate": string|null, "customerOwnerRole": string|null, "ourOwnerRole": string, "definitionOfDone": string[], "dependencies": string[], "risks": string[]}], "workstreams": [{"workstream": "value"|"technical_validation"|"security"|"legal"|"procurement"|"finance"|"exec_alignment"|"implementation_planning"|"other", "objective": string, "ownerRole": string, "tasks": [{"task": string, "owner": "us"|"customer"|"partner", "due": string|null, "definitionOfDone": string[], "blockers": string[]}]}], "stakeholderPlan": {"buyingCommitteeRoles": [{"role": string, "status": "identified"|"unknown", "stance": "champion"|"neutral"|"skeptic"|"unknown", "engagementPlan": string[]}], "execSponsorNeeded": boolean, "execAlignmentPlan": string[]}, "operatingCadence": {"weeklyReview": {"attendees": string[], "agenda": string[], "inputs": string[], "outputs": string[]}, "systemsOfRecord": {"whereTracked": string, "howSharedWithCustomer": string}}, "successMetrics": [{"metric": string, "definition": string, "target": string|null, "cadence": string}], "openQuestions": string[] }',
+      input,
+    },
+    ctx,
+    [
+      "MAP is runnable: milestones have owners, dates, definitions of done, dependencies, and risks",
+      "Includes workstreams for common paper/technical processes with concrete tasks and handoffs",
+      "Operating cadence and system-of-record guidance make the MAP maintainable throughout the deal",
+    ],
+    opts
+  );
+};
+
+export const pipelineDailyHabitsChecklist = (task, ctx = {}, opts = {}) => {
+  const input = normalizeTask(task);
+  return gate(
+    {
+      title: "Pipeline daily habits checklist",
+      prompt:
+        "Create a pipeline execution habits checklist (daily/weekly routines) for an AE/SDR to keep pipeline healthy. Include timeboxes, inputs, outputs, definitions of done, and minimal instrumentation. " +
+        "Represent recurring work as cadence templates/checklists (no code loops or sleep calls). Output JSON only. Output JSON: " +
+        '{ "asOf": string, "role": "ae"|"sdr"|"manager"|"other", "timeZone": string, "goals": {"pipelineTarget": string|null, "meetingsTargetPerWeek": number|null, "activityGuardrails": {"callsPerDay": number|null, "emailsPerDay": number|null, "socialTouchesPerDay": number|null}}, "daily": [{"routine": string, "timeboxMinutes": number, "inputs": string[], "steps": [{"step": string, "definitionOfDone": string}], "outputs": string[], "systemOfRecord": string, "commonFailureModes": [{"failure": string, "fix": string}]}], "weekly": [{"routine": string, "timeboxMinutes": number, "inputs": string[], "steps": [{"step": string, "definitionOfDone": string}], "outputs": string[], "systemOfRecord": string}], "pipelineHygieneChecks": [{"check": string, "how": string, "cadence": "daily"|"weekly", "failureAction": string}], "alerts": [{"trigger": string, "severity": "low"|"medium"|"high", "action": string, "ownerRole": string}], "managerTouchpoints": {"weekly1on1": {"agenda": string[], "inputs": string[], "outputs": string[]}, "dealReviewCadence": string}, "openQuestions": string[] }',
+      input,
+    },
+    ctx,
+    [
+      "Daily and weekly routines are concrete (timeboxed steps with definitions of done, outputs, and systems of record)",
+      "Includes pipeline hygiene checks and alerts that prevent silent pipeline decay (stale stages, missing next steps, slippage)",
+      "Manager touchpoints align habits with inspectable artifacts without requiring a revops redesign",
+    ],
+    opts
+  );
+};

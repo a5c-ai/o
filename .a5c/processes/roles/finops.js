@@ -169,3 +169,65 @@ export const costAnomalyDetectionRunbook = (task, ctx = {}, opts = {}) => {
   );
 };
 
+export const monthlyCloudCostCloseChecklist = (task, ctx = {}, opts = {}) => {
+  const input = normalizeTask(task);
+  return gate(
+    {
+      title: "Monthly cloud cost close checklist",
+      prompt:
+        "Define a monthly cloud cost close checklist that a FinOps team can run end-to-end. Include invoice/usage ingestion, allocation, accruals, anomaly triage, reporting, and sign-off. " +
+        "Make it operational (owners, systems of record, due rules, QA checks, and exception handling). Output JSON only. Output JSON: " +
+        '{ "asOf": string, "scope": {"clouds": string[], "accountsOrSubscriptions": string[], "timeZone": string}, "closeWindow": {"period": string, "open": string, "close": string, "signoffBy": string}, "systems": {"billing": string[], "costPlatform": string|null, "dataWarehouse": string|null, "accounting": string|null, "ticketing": string|null}, "checklist": [{"step": string, "ownerRole": string, "dueRule": string, "inputs": string[], "outputs": string[], "systemOfRecord": string, "qaChecks": string[], "exceptions": {"when": string[], "howTracked": string, "escalation": {"toRoles": string[], "within": string, "messageTemplate": string}}}], "allocation": {"coverageTargetPct": number, "unallocatedPolicy": string, "exceptionTypes": string[], "howMeasured": string}, "accruals": {"required": boolean, "policySummary": string, "howCalculated": string, "ownerRole": string, "journalEntryHandling": string}, "anomalies": {"triageSla": string, "severityModel": [{"severity": "low"|"medium"|"high", "definition": string, "defaultActions": string[]}], "escalationPath": [{"trigger": string, "notifyRoles": string[], "within": string, "action": string}]}, "reporting": {"audiences": [{"audience": string, "needs": string[]}], "dashboards": [{"name": string, "system": string, "tiles": string[]}], "execSummaryTemplate": {"headline": string, "wins": string[], "risks": string[], "asks": string[]}, "cadence": string}, "signoff": {"requiredApprovers": string[], "signoffArtifact": string, "definitionOfDone": string[]}, "openQuestions": string[] }',
+      input,
+    },
+    ctx,
+    [
+      "Checklist covers the full close lifecycle with owners, due rules, systems of record, and QA checks",
+      "Allocation and accruals include explicit policies, coverage targets, and how measurement/sign-off works",
+      "Anomaly triage includes SLAs, severity model, and escalation paths suitable for repeatable monthly operations",
+    ],
+    opts
+  );
+};
+
+export const unitCostModelSpec = (task, ctx = {}, opts = {}) => {
+  const input = normalizeTask(task);
+  return gate(
+    {
+      title: "Unit cost model spec",
+      prompt:
+        "Create a unit cost model spec (unit economics for cloud/infra and product delivery). Define units, formulas, inputs, owners, refresh cadence, validations, and how the model is used in decisions. " +
+        "Stay operational: specify data sources, required dimensions, and QA checks; do not write a full BI implementation. Output JSON only. Output JSON: " +
+        '{ "asOf": string, "context": {"businessModel": "b2b"|"b2c"|"b2b2c"|"marketplace"|"other", "currency": string, "timeZone": string}, "units": [{"unit": string, "definition": string, "numeratorCosts": [{"cost": string, "sourceSystem": string, "allocationRule": string, "notes": string}], "denominatorMetric": {"metric": string, "sourceSystem": string, "definition": string, "grain": string, "notes": string}, "formula": string, "dimensions": string[], "segmentCuts": string[], "dataQualityAssumptions": string[], "ownerRole": string, "refreshCadence": "daily"|"weekly"|"monthly"|"quarterly", "uses": [{"decision": string, "whoUses": string[], "howOften": string, "whatThresholdMatters": string}]}], "validation": [{"check": string, "how": string, "cadence": string, "ownerRole": string, "failureAction": string}], "governance": {"systemOfRecord": string, "changeControl": {"howRequested": string, "approvers": string[], "versioning": string}, "reviewCadence": string}, "knownLimitations": string[], "openQuestions": string[] }',
+      input,
+    },
+    ctx,
+    [
+      "Each unit has a clear definition, formula, inputs/sources, dimensions, and an owner with a refresh cadence",
+      "Validation checks are explicit and operational (how to run, cadence, owner, and what to do on failure)",
+      "Spec connects the model to real decisions (who uses it, thresholds, and governance/change control)",
+    ],
+    opts
+  );
+};
+
+export const taggingCoverageEnforcementRunbook = (task, ctx = {}, opts = {}) => {
+  const input = normalizeTask(task);
+  return gate(
+    {
+      title: "Tagging coverage enforcement runbook",
+      prompt:
+        "Create a tagging coverage enforcement runbook: required tag policy, detection, remediation, exceptions, rollout stages, and ongoing monitoring. " +
+        "Make it implementable (queries/rules, alert routing, playbooks, and systems of record). Output JSON only. Output JSON: " +
+        '{ "asOf": string, "policy": {"requiredTags": [{"key": string, "description": string, "allowedValues": string[]|null, "examples": string[]}], "coverageTargetPct": number, "scope": {"clouds": string[], "accountsOrSubscriptions": string[], "resourceTypes": string[]}, "enforcementStages": [{"stage": "observe"|"warn"|"block"|"auto_remediate", "when": string, "appliesTo": string[], "notes": string}]}, "detection": {"queriesOrRules": [{"name": string, "where": string, "rule": string, "dimensions": string[], "threshold": string, "severity": "low"|"medium"|"high"}], "dashboards": [{"name": string, "system": string, "tiles": string[]}], "alerts": [{"trigger": string, "severity": "low"|"medium"|"high", "routeToRole": string, "responseSla": string, "ticketTemplate": string}]}, "remediation": {"playbooks": [{"scenario": string, "howToIdentifyOwner": string, "steps": [{"step": string, "ownerRole": string, "system": string, "notes": string}], "automationOpportunities": string[], "verification": string}], "autoRemediationGuardrails": {"allowed": boolean, "requiresApprovalWhen": string[], "rollbackPlan": string}}, "exceptions": {"allowedReasons": string[], "approvalRoles": string[], "defaultExpiry": string, "trackingSystem": string, "requiredFields": string[], "renewalRules": string[]}, "governance": {"owners": [{"area": "policy"|"detection"|"remediation"|"exceptions"|"other", "ownerRole": string}], "reviewCadence": string, "changeControl": {"howRequested": string, "approvers": string[], "effectiveDateRule": string}}, "metrics": [{"metric": string, "definition": string, "target": string, "cadence": string, "ownerRole": string}], "openQuestions": string[] }',
+      input,
+    },
+    ctx,
+    [
+      "Policy includes required tags, a measurable coverage target, and staged enforcement so rollout is safe and controllable",
+      "Detection defines concrete rules/queries, dashboards, and alert routing with response SLAs and ticket templates",
+      "Remediation and exceptions are operational (steps, owners, verification, guardrails, expiry/renewal, and governance)",
+    ],
+    opts
+  );
+};

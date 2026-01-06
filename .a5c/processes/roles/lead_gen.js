@@ -109,3 +109,45 @@ export const replyHandlingAndQualificationGuide = (task, ctx = {}, opts = {}) =>
     opts
   );
 };
+
+export const deliverabilityMonitoringRunbook = (task, ctx = {}, opts = {}) => {
+  const input = normalizeTask(task);
+  return gate(
+    {
+      title: "Deliverability monitoring runbook",
+      prompt:
+        "Create a deliverability monitoring and response runbook for outbound/inbound email. Include signals (bounce/complaint rates, spam placement, domain reputation), thresholds, triage steps, remediation playbooks, and reporting. " +
+        "Keep it in lead-gen execution scope; do not propose a full marketing strategy or vendor selection. Output JSON only. Output JSON: " +
+        '{ "asOf": string, "scope": {"sendingDomains": string[], "sendingIps": string[]|null, "mailboxes": string[], "emailProviders": string[], "regions": string[]}, "signals": [{"signal": string, "definition": string, "sourceSystem": string, "refreshCadence": "daily"|"weekly", "thresholds": [{"level": "green"|"yellow"|"red", "criteria": string}], "ownerRole": string}], "monitoring": {"dashboards": [{"name": string, "system": string, "tiles": string[]}], "alerts": [{"trigger": string, "severity": "low"|"medium"|"high", "routeToRole": string, "responseSla": string, "ticketTemplate": string}]}, "triage": {"firstResponseSla": string, "steps": [{"step": string, "who": string, "tools": string[], "decision": string, "next": string}], "commonRootCauses": [{"cause": string, "signals": string[], "howToConfirm": string[], "fix": string[], "prevention": string[]}]}, "remediationPlaybooks": [{"scenario": "spam_complaints"|"high_bounce"|"blacklist"|"poor_inbox_placement"|"auth_failure"|"content_flags"|"volume_spike"|"other", "whenToUse": string, "steps": [{"step": string, "ownerRole": string, "notes": string}], "rollbackOrStopRules": string[], "verification": string}], "controls": {"authentication": {"spf": string, "dkim": string, "dmarc": string, "monitoringHow": string}, "listHygiene": {"suppressionHandling": string, "unsubscribeHandling": string, "bounceHandling": string, "reengagementPolicy": string}, "rateLimitsAndWarmup": {"policy": string, "guardrails": string[]}}, "reporting": {"cadence": string, "audiences": string[], "templateSections": string[]}, "openQuestions": string[] }',
+      input,
+    },
+    ctx,
+    [
+      "Signals include clear definitions, sources, refresh cadence, and thresholds that trigger actionable alerts",
+      "Runbook includes triage steps and remediation playbooks with stop rules and verification to prevent prolonged damage",
+      "Controls cover authentication, list hygiene, and warm-up/rate limits so deliverability is sustainable",
+    ],
+    opts
+  );
+};
+
+export const listRefreshCadenceTemplate = (task, ctx = {}, opts = {}) => {
+  const input = normalizeTask(task);
+  return gate(
+    {
+      title: "List refresh cadence template",
+      prompt:
+        "Create a recurring list refresh cadence template for outbound prospecting lists. Include frequency, inputs, QC sampling, dedupe, enrichment, suppression, and handoff notes. " +
+        "Represent recurring work as schedule/checklist templates (no code loops or sleep calls). Output JSON only. Output JSON: " +
+        '{ "asOf": string, "cadence": [{"frequency": "weekly"|"biweekly"|"monthly"|"quarterly", "name": string, "ownerRole": string, "inputs": string[], "checklists": [{"name": string, "items": [{"item": string, "definitionOfDone": string, "systemOfRecord": string}]}], "qualityChecks": [{"check": string, "how": string, "threshold": string, "failureAction": string}], "alerts": [{"trigger": string, "severity": "low"|"medium"|"high", "action": string}]}], "suppressionAndCompliance": {"sources": string[], "howApplied": string, "auditTrailWhere": string}, "handoff": {"toRole": string, "whatToInclude": string[], "fileNamingConvention": string}, "metrics": [{"metric": string, "definition": string, "cadence": string, "target": string|null}], "openQuestions": string[] }',
+      input,
+    },
+    ctx,
+    [
+      "Cadence includes concrete checklists with definition-of-done and systems of record so refreshes are repeatable",
+      "Quality checks include sampling, thresholds, and failure actions that prevent list decay and deliverability harm",
+      "Compliance/suppression handling is explicit with an audit trail location and clear handoff artifacts",
+    ],
+    opts
+  );
+};

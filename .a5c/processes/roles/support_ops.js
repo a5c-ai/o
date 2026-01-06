@@ -127,3 +127,45 @@ export const slaSloPolicyAndEscalationPaths = (task, ctx = {}, opts = {}) => {
     opts
   );
 };
+
+export const supportBacklogTriageCadenceTemplate = (task, ctx = {}, opts = {}) => {
+  const input = normalizeTask(task);
+  return gate(
+    {
+      title: "Support backlog triage cadence template",
+      prompt:
+        "Create a recurring backlog triage cadence template for support operations: daily/weekly rituals, prioritization rules, aging controls, escalation paths, and output artifacts. " +
+        "Represent recurring work as schedule/checklist templates (no code loops or sleep calls). Output JSON only. Output JSON: " +
+        '{ "asOf": string, "context": {"ticketingSystem": string, "supportTiers": string[], "regionsAndTimeZones": string[], "businessHours": string}, "cadence": [{"frequency": "daily"|"weekly", "ritual": {"name": string, "meetingOrAsync": string, "attendees": string[], "agenda": string[], "inputs": string[], "outputs": string[]}, "triageRules": [{"rule": string, "priority": "p0"|"p1"|"p2"|"p3", "why": string}], "checklists": [{"name": string, "items": [{"item": string, "ownerRole": string, "definitionOfDone": string, "systemOfRecord": string}]}], "alerts": [{"trigger": string, "severity": "low"|"medium"|"high", "ownerRole": string, "action": string}]}], "agingControls": {"targets": [{"bucket": string, "maxAgeDays": number, "definition": string}], "autoEscalateWhen": string[], "stuckTicketRunbook": {"steps": string[], "escalationPath": string[]}}, "artifacts": {"dailySummaryTemplate": {"fields": string[]}, "weeklyHealthReviewTemplate": {"fields": string[]}, "systemOfRecord": string}, "metrics": [{"metric": string, "definition": string, "target": string|null, "cadence": string}], "openQuestions": string[] }',
+      input,
+    },
+    ctx,
+    [
+      "Cadence includes concrete rituals, triage rules, checklists, and alerts suitable for repeatable backlog control",
+      "Aging controls define targets and stuck-ticket runbooks with escalation paths to reduce long-tail backlog risk",
+      "Artifacts and systems of record make outputs auditable and useful for continuous improvement",
+    ],
+    opts
+  );
+};
+
+export const supportCostToServeModelSpec = (task, ctx = {}, opts = {}) => {
+  const input = normalizeTask(task);
+  return gate(
+    {
+      title: "Support cost-to-serve model spec",
+      prompt:
+        "Create a support cost-to-serve model spec: define how to compute cost per ticket/contact and cost by segment (tier, plan, product, channel, priority), including inputs, allocation rules, refresh cadence, and validation checks. " +
+        "Keep it operational (systems of record, definitions, QA, and governance). Output JSON only. Output JSON: " +
+        '{ "asOf": string, "currency": string, "timeZone": string, "context": {"ticketing": string, "wfmOrScheduling": string|null, "financeOrPayroll": string|null, "warehouseOrBi": string|null}, "costInputs": [{"cost": "labor"|"vendor"|"tooling"|"overhead"|"other", "sourceSystem": string, "allocationRule": string, "notes": string}], "activityInputs": [{"metric": string, "sourceSystem": string, "definition": string, "grain": string, "notes": string}], "modelOutputs": [{"output": "cost_per_ticket"|"cost_per_contact"|"cost_per_resolution"|"cost_per_account"|"other", "definition": string, "formula": string, "dimensions": string[], "segmentCuts": string[], "refreshCadence": "weekly"|"monthly"|"quarterly", "ownerRole": string}], "allocationAndAttribution": {"sharedCostPolicy": string, "whenToUseCostPools": string, "guardrails": string[]}, "validation": [{"check": string, "how": string, "cadence": string, "ownerRole": string, "failureAction": string}], "governance": {"systemOfRecord": string, "changeControl": {"howRequested": string, "approvers": string[], "versioning": string}, "reviewCadence": string}, "uses": [{"decision": string, "whoUses": string[], "whatThresholdMatters": string}], "knownLimitations": string[], "openQuestions": string[] }',
+      input,
+    },
+    ctx,
+    [
+      "Spec defines inputs, allocation rules, and outputs with formulas/dimensions so cost-to-serve is defensible",
+      "Validation checks and governance make the model stable and usable over time (refresh cadence, owners, change control)",
+      "Outputs connect to decisions (staffing, deflection, tiering, automation) with clear thresholds and limitations",
+    ],
+    opts
+  );
+};
