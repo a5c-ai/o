@@ -8,6 +8,7 @@ export * from "./devops.js";
 export * from "./engineering.js";
 export * from "./go_to_market.js";
 export * from "./operations.js";
+export * from "./process_automation.js";
 export * from "./procurement_ops.js";
 export * from "./finance.js";
 export * from "./finops.js";
@@ -43,6 +44,7 @@ import * as devops from "./devops.js";
 import * as engineering from "./engineering.js";
 import * as goToMarket from "./go_to_market.js";
 import * as operations from "./operations.js";
+import * as processAutomation from "./process_automation.js";
 import * as procurementOps from "./procurement_ops.js";
 import * as finance from "./finance.js";
 import * as finops from "./finops.js";
@@ -79,6 +81,7 @@ export const roleRegistry = {
   engineering,
   go_to_market: goToMarket,
   operations,
+  process_automation: processAutomation,
   procurement_ops: procurementOps,
   finance,
   finops,
