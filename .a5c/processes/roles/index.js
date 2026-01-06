@@ -1,4 +1,5 @@
 export * from "./analytics.js";
+export * from "./architecture.js";
 export * from "./billing_collections_ops.js";
 export * from "./data_engineering.js";
 export * from "./data_science.js";
@@ -23,8 +24,10 @@ export * from "./project.js";
 export * from "./qa.js";
 export * from "./customer_success.js";
 export * from "./security.js";
+export * from "./site_reliability.js";
 export * from "./sales_ops_revops.js";
 export * from "./sales_execution.js";
+export * from "./sales_engineering.js";
 export * from "./lead_gen.js";
 export * from "./support.js";
 export * from "./support_ops.js";
@@ -36,6 +39,7 @@ export * as development from "./development/index.js";
 export * as entrepreneur from "./entrepreneur/index.js";
 
 import * as analytics from "./analytics.js";
+import * as architecture from "./architecture.js";
 import * as billingCollectionsOps from "./billing_collections_ops.js";
 import * as dataEngineering from "./data_engineering.js";
 import * as dataScience from "./data_science.js";
@@ -60,8 +64,10 @@ import * as project from "./project.js";
 import * as qa from "./qa.js";
 import * as customerSuccess from "./customer_success.js";
 import * as security from "./security.js";
+import * as siteReliability from "./site_reliability.js";
 import * as salesOpsRevops from "./sales_ops_revops.js";
 import * as salesExecution from "./sales_execution.js";
+import * as salesEngineering from "./sales_engineering.js";
 import * as leadGen from "./lead_gen.js";
 import * as support from "./support.js";
 import * as supportOps from "./support_ops.js";
@@ -74,6 +80,7 @@ import * as entrepreneur from "./entrepreneur/index.js";
 
 export const roleRegistry = {
   analytics,
+  architecture,
   billing_collections_ops: billingCollectionsOps,
   data_engineering: dataEngineering,
   data_science: dataScience,
@@ -98,8 +105,10 @@ export const roleRegistry = {
   qa,
   customer_success: customerSuccess,
   security,
+  site_reliability: siteReliability,
   sales_ops_revops: salesOpsRevops,
   sales_execution: salesExecution,
+  sales_engineering: salesEngineering,
   lead_gen: leadGen,
   support,
   support_ops: supportOps,

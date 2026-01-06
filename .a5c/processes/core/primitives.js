@@ -3,8 +3,9 @@ export const primitivesFrom = (ctx = {}) => {
   const score = ctx.score ?? globalThis.score;
   const breakpoint = ctx.breakpoint ?? globalThis.breakpoint;
   const develop = ctx.develop ?? globalThis.develop;
+  const kanban = ctx.kanban ?? globalThis.kanban;
 
-  return { act, score, breakpoint, develop };
+  return { act, score, breakpoint, develop, kanban };
 };
 
 export const requirePrimitive = (name, value) => {
@@ -34,4 +35,3 @@ export const defaultDevelop = (task, ctx = {}) => {
 
   return act(String(task), ctx);
 };
-

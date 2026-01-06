@@ -48,5 +48,6 @@ export * from "./gcp_firestore.js";
 export * from "./azure_cosmosdb.js";
 export * from "./azure_servicebus.js";
 export * from "./cli_tool.js";
+export * as packs from "./packs/index.js";
 export * from "./registry.js";
 export * from "./criteria.js";
