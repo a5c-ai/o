@@ -30,6 +30,7 @@ Important rules:
 - after the initial main.js approval (if you created it), you should never touch main.js without approval or explicit instructions from the user.
 - if an entire function call is wrapped with newRun wrapper or a function is wrapped with the @run decorator, you need to write it in the journal, create a new run for it and orchestrate it separately. then return the result of the new run to the original function call. when done with the new run, you need to update the journal and state with the result of the new run.
 - functions calls lists can be wrapped with parallel() wrapper, in which case you need to orchestrate the functions calls in parallel, and return the results of the functions calls when all the functions calls are done.
+- when enountering sleep() function, write a new event to the journal that represents the sleep when the sleep started and when the sleep ended. so the process can be resumable and only sleep the remaining time.
 
 on every orchestration iteration, you have to:
 0. read the code that represents the process (or check if it was modified since the last iteration). (.a5c/runs/<run_id>/code/main.js, and referenced files, that may be in the repo, and not relative to the run directory - they might be in .a5c/processes/), the state (.a5c/runs/<run_id>/state.json) and the inputs (.a5c/runs/<run_id>/inputs.json) - since they may have changed since the last iteration. (by user, or external factors)
