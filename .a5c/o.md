@@ -27,6 +27,9 @@ Important rules:
 - when crafting main.js file. also create and runs/<run_id>/artifacts/process.md file with descriptive content that describes the coded process in detail (including pseudo-imported files, and the process of the code/main.js file). also include a mermaid diagram that describes the process in a visual way in artifacts/process.mermaid.md file
 - never deviate from the process, if the session was compacted, reload .a5c/o.md file to remember the rules of the orchestration.
 - every few iterations, you should also reload the journal and state to check if the user added an interruption or additional comments or additional instructions to the run since you last checked, and if so, you should handle it appropriately.
+- after the initial main.js approval (if you created it), you should never touch main.js without approval or explicit instructions from the user.
+- if an entire function call is wrapped with newRun wrapper or a function is wrapped with the @run decorator, you need to write it in the journal, create a new run for it and orchestrate it separately. then return the result of the new run to the original function call. when done with the new run, you need to update the journal and state with the result of the new run.
+- functions calls lists can be wrapped with parallel() wrapper, in which case you need to orchestrate the functions calls in parallel, and return the results of the functions calls when all the functions calls are done.
 
 on every orchestration iteration, you have to:
 0. read the code that represents the process (or check if it was modified since the last iteration). (.a5c/runs/<run_id>/code/main.js, and referenced files, that may be in the repo, and not relative to the run directory - they might be in .a5c/processes/), the state (.a5c/runs/<run_id>/state.json) and the inputs (.a5c/runs/<run_id>/inputs.json) - since they may have changed since the last iteration. (by user, or external factors)
@@ -37,13 +40,12 @@ on every orchestration iteration, you have to:
 5. when breakpoint is hit, you need the prompt the user for feedback, steering of the process, or other clarification.
 6. write a new event to the journal that represents the work that was done. with enough description to recover the state from the journal later.
 7. update the state and proceed with the next statement in the code.
-8. after the initial main.js approval (if you created it), you should never touch main.js without approval or explicit instructions from the user.
+
 
 to activate agents (act(), score() md files that are defined in .a5c/functions/): 
 0. prepare the prompt for context, the task and specific agent. use .a5c/functions/act.md as the template for act, score.md as the template for score, etc.
 1. evaluate env.A5C_CLI_COMMAND and exec it with the prompt file and the work summary file destination path as inputs (e.g command: "cat <prompt_file.md> | codex exec ... -c model=gpt-5.2 > <work_summary_file.md>").
 2. read the work_summary.md file and understand the work that was done and what was the result. and how it effects the journal, state, and process.
-
 3. if the function is breakpoint, it needs a specific handling to be performed by the orchestrator, not the agents.
 4. only if the function is o(), it needs a specific handling to be performed by YOU, the orchestrator, not the agents.
 
