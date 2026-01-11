@@ -917,9 +917,10 @@ main() {
     if [[ "$A5C_PROVIDER_NAME" == "azure" ]]; then
       [[ -n "${AZURE_OPENAI_PROJECT_NAME:-}" ]] || die "AZURE_OPENAI_PROJECT_NAME is required for provider=azure"
       [[ -n "${AZURE_OPENAI_API_KEY:-}" ]] || die "AZURE_OPENAI_API_KEY is required for provider=azure"
-      local azure_provider
-      azure_provider="-c model_providers.azure.name=azure -c model_providers.azure.wire_api=responses -c model_providers.azure.base_url=https://${AZURE_OPENAI_PROJECT_NAME}.openai.azure.com/openai -c model_providers.azure.env_key=AZURE_OPENAI_API_KEY -c model_providers.azure.query_params.api-version=2025-04-01-preview"
-      export A5C_CLI_ADDITIONAL_PARAMS="${A5C_CLI_ADDITIONAL_PARAMS}-c model_provider=azure ${azure_provider}"
+      local azure_provider azure_base_url
+      azure_base_url="https://${AZURE_OPENAI_PROJECT_NAME}.openai.azure.com/openai"
+      azure_provider="-c model_providers.azure.name=azure -c model_providers.azure.wire_api=responses -c model_providers.azure.base_url=\"${azure_base_url}\" -c model_providers.azure.env_key=AZURE_OPENAI_API_KEY -c model_providers.azure.query_params.api-version=2025-04-01-preview"
+      export A5C_CLI_ADDITIONAL_PARAMS="${A5C_CLI_ADDITIONAL_PARAMS} -c model_provider=azure ${azure_provider}"
     fi
     export A5C_CLI_ADDITIONAL_PARAMS="${A5C_CLI_ADDITIONAL_PARAMS} --dangerously-bypass-approvals-and-sandbox -c model=${A5C_SELECTED_MODEL}"
     export A5C_CLI_COMMAND_INTERACTIVE="${A5C_BASE_COMMAND} ${A5C_CLI_ADDITIONAL_PARAMS} --search"
