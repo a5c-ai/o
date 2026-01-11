@@ -1,252 +1,135 @@
-# o - Next-Generation Development Process Automation Tool - aka "Stop babysitting your agents"
+<div align="center" id="hero">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="./o-hero-dark.svg">
+    <img src="./o-hero-light.svg" alt="o orchestration hero" width="720">
+  </picture>
+  <h1>babysitter -- Codify and run high-assurance agent processes</h1>
+  <p>Stop babysitting your agents -- `./o` keeps orchestration prompts, quality gates, and audit trails versioned next to your code.</p>
+  <p>
+    <a href="#install" style="display:inline-block;padding:0.55rem 1.05rem;margin:0 0.25rem;border-radius:999px;background:#111;color:#fff;text-decoration:none;">Install</a>
+    <a href="#how-it-works" style="display:inline-block;padding:0.55rem 1.05rem;margin:0 0.25rem;border-radius:999px;background:#f2f2f2;color:#111;text-decoration:none;">How it works</a>
+    <a href="#examples" style="display:inline-block;padding:0.55rem 1.05rem;margin:0 0.25rem;border-radius:999px;background:#111;color:#fff;text-decoration:none;">Examples</a>
+    <a href="#cli" style="display:inline-block;padding:0.55rem 1.05rem;margin:0 0.25rem;border-radius:999px;background:#f2f2f2;color:#111;text-decoration:none;">CLI</a>
+  </p>
+  <sub>Made by <a href="https://a5c.ai">a5c.ai</a>. For the deep dive, see <a href="/USER_GUIDE.md">USER_GUIDE.md</a>; this README is the fast-start view.</sub>
+</div>
 
-`o` is a next-generation development process automation tool. it is small but smart wrapper around your chosen agent CLI (`codex`, `claude-code`, `gemini`, or a `custom` runner) to help you and your agents follow development processes that yield high quality results.
+> Governance: Maintained by the a5c.ai Core team under the [Contributor Covenant 2.1](https://www.contributor-covenant.org/version/2/1/code_of_conduct/). Extra detail lives in the addenda: [`README.contributing.md`](./README.contributing.md), [`README.operations.md`](./README.operations.md), [`README.support.md`](./README.support.md), [`README.security.md`](./README.security.md), [`README.faq.md`](./README.faq.md).
 
-It focuses on three practical problems when using agents for real work:
+## <a id="badges"></a>Trust & Distribution
 
-- Process-following: put the orchestration prompt and reusable process patterns in the repo, so "how we work" is versioned next to the code.
-- Convergence to quality: use explicit quality criteria and evaluation loops (via the included process code patterns) to iterate until the result clears a threshold.
-- Predictability: encourage reproducible runs by capturing inputs, prompts, work summaries, and an audit trail under a consistent `.a5c/runs/<run_id>/` convention (gitignored by default).
+<p align="center">
+  <a href="https://github.com/a5c-ai/o"><img src="https://img.shields.io/badge/Maintainer-a5c.ai-ff3366?style=for-the-badge" alt="Maintainer a5c.ai"></a>
+  <a href="https://github.com/a5c-ai/o/releases"><img src="https://img.shields.io/github/v/tag/a5c-ai/o?label=stable&style=for-the-badge" alt="Stable version"></a>
+  <a href="https://github.com/a5c-ai/o/commits/main"><img src="https://img.shields.io/github/commits-since/a5c-ai/o/latest/main?label=nightly&style=for-the-badge" alt="Nightly delta"></a>
+  <a href="https://github.com/a5c-ai/o/actions"><img src="https://img.shields.io/badge/CI-bash%20lint-green?logo=githubactions&style=for-the-badge" alt="CI bash lint"></a>
+  <a href="https://github.com/a5c-ai/o/actions"><img src="https://img.shields.io/badge/CI-installer%20smoke-green?logo=githubactions&style=for-the-badge" alt="CI installer smoke"></a>
+  <a href="https://github.com/a5c-ai/o/blob/main/LICENSE"><img src="https://img.shields.io/github/license/a5c-ai/o?style=for-the-badge" alt="License"></a>
+  <a href="https://github.com/a5c-ai/o"><img src="https://img.shields.io/badge/Homebrew%20tap-ready-24292f?style=for-the-badge" alt="Homebrew tap"></a>
+  <a href="https://github.com/a5c-ai/o/labels/good%20first%20issue"><img src="https://img.shields.io/badge/PRs-Welcome-0A1?style=for-the-badge" alt="PRs Welcome"></a>
+</p>
 
-What this repo ships:
+## <a id="overview"></a>What is `babysitter`?
 
-- `./o`: loads config, renders `.a5c/o.md` with your request, and executes the configured runner.
-- `.a5c/`: templates for the orchestration prompt, function prompts, and reusable process patterns.
+`babysitter` is a Utility that wraps your preferred agent runner with:
+- **Repo-local processes** stored in `.a5c/processes/` so the same workflow runs every time.
+- **Event-sourced runs** under `.a5c/runs/<id>/` that capture prompts, work, and checkpoints.
+- **Quality loops** that iterate until the work meets a score you set.
+- **Human-in-the-loop breakpoints** where you approve plans, pivot scope, or stop the loop.
 
-Platform note: `o` is Bash. On Windows, use WSL2 (recommended) or Git Bash/MSYS2.
+Personas served:
+- **Contributors** replay the same prompt/process combo and see exactly what changed.
+- **Maintainers/decision makers** get predictable release cadence and visible audit trails.
+- **Ops/platform teams** can diagnose or resume runs because artifacts and doctor hints are recorded.
 
-Jump to: [Quickstart](#quickstart) | [Prerequisites](#prerequisites) | [Install](#install) | [Usage](#usage) | [Configuration](#configuration) | [How it works](#how-it-works) | [Why quality converges](#why-quality-converges) | [Security](#security-notes) | [Troubleshooting](#troubleshooting) | [Uninstall](#uninstall) | [Contributing](#contributing) | [`INSTALL.md`](INSTALL.md)
+## <a id="how-it-works"></a>How Runs Work
 
-## Prerequisites
+1. `./o "your request"` creates `.a5c/runs/<id>/` with `inputs.json`, `code/main.js`, `state.json`, `journal.jsonl`, prompts, work summaries, and artifacts.
+2. `act()` produces work; `score()` evaluates it against explicit checks; the loop repeats until the score clears the configured bar.
+3. `breakpoint()` events pause the loop for human steering (approve plan, confirm pivot, accept risk).
+4. Configuration is resolved via `O_CREDS_FILE` (or `--global | --local | --file PATH`), so secrets stay outside prompts.
+5. Every run is auditable: you can diff artifacts, inspect prompts, or rerun the process later.
 
-- **Bash** (macOS/Linux; Windows via **WSL2** or **Git Bash/MSYS2**)
-- **curl** and **tar** (required by the installer)
+## <a id="examples"></a>Example Use Cases
 
-## Quickstart
+### 1. Upgrade the README with quality gates
+```bash
+./o "Revamp README.md: research references, draft, score >= 0.93, summarize follow-ups."
+```
+- Process: `technical_writing.js#readmeQualityLoop` is selected automatically.
+- Artifacts: research JSON + outline, `README.draft.md`, `README.final.md`, `run_summary.json`.
+- Technical detail: `score()` enforces the rubric before the loop exits; everything lands under `.a5c/runs/<id>/artifacts/`.
+
+### 2. Triage flaky tests with a scoped pivot
+```bash
+./o "Audit flaky auth tests, propose mitigations, and pivot to fix the highest-impact issue."
+```
+- Investigation notes are captured in `.a5c/runs/<id>/work_summaries/`.
+- A breakpoint lets you update `inputs.json` (for example, focus on `auth_refresh_test.sh`) so subsequent `act()` steps implement a narrow fix plus regression tests.
+- `journal.jsonl` records every hypothesis and fix attempt, making it easy to hand the run to another engineer.
+
+Find more scenarios (release prep, migrations, troubleshooting) in [USER_GUIDE.md](/USER_GUIDE.md#end-to-end-orchestration-examples).
+
+## <a id="install"></a>Install & Verify
+
+| Track | Command | Verification | Notes |
+| --- | --- | --- | --- |
+| Stable (tagged) | `curl -fsSL https://raw.githubusercontent.com/a5c-ai/o/main/install.sh \| bash -s -- --to .` | `shasum -a 256 ./o`, `bash -n ./o` | Weekly tags every Friday. Roll back via `git checkout tags/<tag>`. |
+| Nightly | `curl -fsSL ... install.sh \| bash -s -- --to . --nightly` | `./o --version` prints `nightly-<commit>`; `./install.sh --smoke-test` | Auto-published after green CI; rerun stable to undo. |
+| Homebrew | `brew tap a5c/tap && brew install o-cli` | `brew info o-cli`, `./o doctor --show-install-hints` | macOS/Linux convenience install. |
+| Manual clone | `git clone https://github.com/a5c-ai/o && cd o && chmod +x ./o` | `./o help` | Best for audits or offline work. |
+
+After any install/upgrade, run `./o doctor --show-install-hints` to confirm dependencies and runner CLIs.
+
+## <a id="quickstart"></a>Quickstart
 
 ```bash
-# 1) Install into the current directory (script + .a5c/ templates)
-curl -fsSL https://raw.githubusercontent.com/a5c-ai/o/main/install.sh | bash -s -- --to .
-
-# 2) Create/update your config (writes global config by default)
-./o init
-
-# 3) Validate your setup (use --show-install-hints for extra help)
+./o init --global         # writes ~/.a5c/creds.env (use --local for repo-scoped config)
 ./o doctor --show-install-hints
-
-# 4) Run a request
 ./o "spec and implement a CLI onboarding flow"
 ```
 
-## Install
-
-### One-liner (no git required)
-
-Installs `./o` + `.a5c/` templates into a target directory by downloading the repo tarball from GitHub:
-
-```bash
-curl -fsSL https://raw.githubusercontent.com/a5c-ai/o/main/install.sh | bash -s -- --to .
-```
-
-### Inspect-first (download, inspect, then run)
-
-If you prefer not to run `curl | bash`, you can download the installer from the same raw URL, inspect it locally, then run it:
-
-```bash
-curl -fsSLo install.sh https://raw.githubusercontent.com/a5c-ai/o/main/install.sh
-sed -n '1,200p' install.sh
-bash ./install.sh --to .
-rm -f ./install.sh
-```
-
-Installer flags:
-
-- `--to DIR` target directory (default: current directory)
-- `--force` overwrite existing `o` / `.a5c/{o.md,functions,processes}`
-- `--no-gitignore` do not modify target `.gitignore`
-- `--smoke-test` run local smoke tests in a temp dir (repo-only)
-- `--help` show usage
-
-### From a clone
-
-```bash
-git clone https://github.com/a5c-ai/o
-cd o
-chmod +x ./o
-./o help
-```
-
-For full installation notes, see `INSTALL.md`.
-
-## Usage
-
-Core commands:
-
-- `./o init` - interactive onboarding, writes a config file
-- `./o doctor` - validates config + runner setup (`--show-install-hints` prints optional install hints)
-- `./o help` - usage + defaults
-
-Run a request (uses your configured runner):
-
-```bash
-./o "review this repo and propose a test strategy"
-```
-
-## Configuration
-
-### Config file location
-
-Default global config path: `~/.a5c/creds.env`
-
-Resolution order:
-
-1. `O_CREDS_FILE` (explicit override)
-2. `~/.a5c/creds.env` (global)
-3. `.a5c/creds.env` (local, next to `./o`)
-
-You can also force a choice per command:
-
-```bash
-./o init --global
-./o init --local
-./o doctor --file /absolute/path/to/creds.env
-./o --global "your request here"
-```
-
-### Config format (safe-by-default)
-
-The config is an env-style file (`KEY=VALUE`). For safety, `o` only supports plain assignments (no shell code).
-
-`./o init` writes a managed block delimited by:
-
-- `# --- A5C managed by \`o init\` ---`
-- `# --- End A5C managed ---`
-
-Re-running `./o init` is idempotent: it rewrites only the managed block and preserves unmanaged content outside the markers (atomic write via temp file + `mv`).
-
-### Runner presets
-
-`o` supports the following runners:
-
-- `codex` - providers: `openai` / `azure`
-- `claude-code` - providers: `anthropic` / `bedrock` / `vertex`
-- `gemini` - provider: `gemini`
-- `custom` - execute your own command template
-
-`./o init` will prompt you for the relevant API key(s) and write them to the selected config file.
-
-## Custom runners (trust boundary)
-
-Custom runners are powerful, but they are also your trust boundary:
-
-- `A5C_CUSTOM_COMMAND_TEMPLATE` is executed via `bash -lc` on your machine.
-- The template **must** include `{{prompt_path}}` and should quote it.
-- Don't embed secrets in the command template itself; keep secrets in the creds file.
-- Treat runner binaries as part of your threat model (you are executing them on your machine).
-
-Example template (a runner that accepts a prompt file path):
-
-```bash
-A5C_CUSTOM_COMMAND_TEMPLATE='my-runner --prompt-file {{prompt_path}}'
-```
-
-Install hints:
-
-- Set `A5C_CUSTOM_INSTALL_COMMAND` (optional) and run `./o doctor --show-install-hints`.
-
-Gemini-specific overrides (optional):
-
-- `A5C_GEMINI_COMMAND_TEMPLATE` (must include `{{prompt_path}}`)
-- `A5C_GEMINI_INSTALL_COMMAND` (shown by `./o doctor --show-install-hints`)
-
-## How it works
-
-End-to-end flow (`./o "your request"`):
-
-1. `./o` loads your creds file (KV-only parsing; no `source`).
-2. It renders a temporary prompt from `.a5c/o.md` by substituting `{{request}}`.
-3. It runs the selected runner preset (`codex`, `claude-code`, `gemini`) or a custom command template.
-4. The orchestration prompt (not the Bash script) tells the agent how to structure work, including where to write artifacts.
-
-What is in `.a5c/`:
-
-- `.a5c/o.md`: the orchestration "driver" prompt.
-- `.a5c/functions/`: prompt templates for `act()`, `develop()`, `score()`.
-- `.a5c/processes/`: reusable process patterns expressed as code/pseudocode (e.g., planned work, test-driven loops, quality-gated iteration).
-
-Run artifacts (by convention):
-
-The default `.a5c/o.md` prompt expects the orchestrator to keep an audit trail and working state under `.a5c/runs/<run_id>/`, including:
-
-- `inputs.json` (what was asked)
-- `prompts/` and `work_summaries/` (what was sent to the runner and what came back)
-- `journal.jsonl` (append-only event log)
-- `state.json` (derived state for resuming)
-
-Installers manage `.gitignore` to keep `.a5c/runs/` out of git by default.
-
-## Why quality converges
-
-`o` itself is intentionally thin; the "quality convergence" comes from using repeatable process patterns in the orchestration prompt:
-
-- Make quality criteria explicit (what to evaluate, and what "good" means) instead of relying on implicit taste.
-- Use an evaluation loop (act -> score -> fix) until the score clears a threshold; see `.a5c/functions/score.md` and example process patterns like `.a5c/processes/development/v2/core/loops/quality_gate.js` and `.a5c/processes/development/v2/aspects/quality.js`.
-- Keep artifacts and feedback in the run directory so you can review, diff, and rerun with the same inputs and process.
-
-## Security notes
-
-- Credentials are stored locally in plain text at `~/.a5c/creds.env` by default; `o` attempts to enforce `chmod 600` and warns when permissions look unsafe.
-- Treat `.a5c/runs/` as potentially sensitive (it can contain prompts, work summaries, and task context); keep it out of git.
-- If you use `custom` runners, consider the creds file + runner template a single security boundary (review changes before re-running).
-
-## Getting help
-
-- Start with `./o help` and `./o doctor --show-install-hints` (they are the source of truth for flags + install hints).
-- Check `INSTALL.md` for installation notes and `Troubleshooting` below for common errors.
-- When asking for help, include sanitized output from `./o doctor` (avoid pasting secrets from your creds file).
-
-## Troubleshooting
-
-- "`config not found. Run: ./o init`" -> run `./o init` (or set `O_CREDS_FILE` / use `--file PATH`).
-- "unsupported line in config" -> the creds file must be `KEY=VALUE` only (no shell snippets).
-- Runner CLI missing -> run `./o doctor --show-install-hints` and follow the printed install command(s).
-- Permission warnings -> consider `chmod 600 ~/.a5c/creds.env` and `chmod 700 ~/.a5c`.
-
-## Uninstall
-
-From a repo where you installed `o`:
-
-```bash
-rm -f ./o
-rm -rf ./.a5c/
-```
-
-Optional (removes global config; only do this if you're not using it for other repos):
-
-```bash
-rm -f ~/.a5c/creds.env
-```
-
-## Verification (cheap)
-
-```bash
-bash -n ./o
-./o help
-./o init
-./o doctor --show-install-hints
-```
-
-## Contributing
-
-- Keep changes minimal and CLI-doc-accurate (README should match `./o help` and `./install.sh --help`).
-- Run local checks:
-
-```bash
-bash -n ./o
-bash -n ./install.sh
-./install.sh --smoke-test
-```
+Expected artifacts: `.a5c/runs/<id>/inputs.json`, `code/main.js`, `state.json`, `journal.jsonl`, `prompts/`, `work_summaries/`, plus deliverables under `artifacts/`.
+
+Need deeper CLI help or troubleshooting flows? Jump to:
+- [USER_GUIDE.md#quickstart](/USER_GUIDE.md#quickstart)
+- [USER_GUIDE.md#configuration](/USER_GUIDE.md#configuration)
+- [USER_GUIDE.md#copypaste-recipes](/USER_GUIDE.md#copypaste-recipes)
+
+## <a id="cli"></a>Essential CLI Commands
+
+| Command | Purpose | Tips |
+| --- | --- | --- |
+| `./o init [--global|--local|--file PATH]` | Create/update creds + config | Defaults to `~/.a5c/creds.env`. Use `--local` for repo-scoped config or `--file` for explicit paths. |
+| `./o doctor --show-install-hints` | Validate setup | Prints missing runner instructions; useful before long runs or CI promotions. |
+| `./o [--global|--local|--file PATH] "request"` | Run an orchestration | Generates a fresh run folder; use CLI flags to select creds per invocation. |
+| `./o help` | CLI usage | Shows the full command matrix and flag descriptions. |
+
+## <a id="usage"></a>Usage & Docs at a Glance
+
+| Topic | Where to look | Quick link |
+| --- | --- | --- |
+| Core CLI flags | `./o help`, [`USER_GUIDE.md`](/USER_GUIDE.md#cli-overview) | `./o --help` |
+| Credentials | `~/.a5c/creds.env` or `.a5c/creds.env` | `./o init --global` / `./o init --local` |
+| Custom runners | `.a5c/functions/`, `USER_GUIDE.md#runner-presets` | `./o doctor --show-install-hints` |
+| Process library | `.a5c/processes/` | `rg --files .a5c/processes` |
+| Extended docs | `README.contributing.md`, `README.operations.md`, `README.support.md`, `README.security.md`, `README.faq.md`, `USER_GUIDE.md`, `INSTALL.md` | `./o "open docs"` |
+
+## <a id="architecture"></a>Architecture Snapshot
+
+- **CLI entrypoint (`./o`)** -- dispatches work to the selected process and records results.
+- **`.a5c/functions/`** -- Markdown templates describing reusable actions (`act`, `score`, `plan`, etc.).
+- **`.a5c/processes/`** -- JavaScript workflows for roles (technical writing, release prep, bug fixes).
+- **`.a5c/runs/<id>/`** -- per-request audit folders containing inputs, journal, state, prompts, work summaries, and artifacts.
+- **`.a5c/orchestrator_scripts/`** -- helper scripts that keep prompts, CLI commands, and journal updates consistent across platforms.
+
+## <a id="more"></a>More References
+
+- Contribution workflow: [`README.contributing.md`](./README.contributing.md)
+- Operations runbooks and release cadence: [`README.operations.md`](./README.operations.md)
+- Community/support touchpoints: [`README.support.md`](./README.support.md)
+- Security + disclosure process: [`README.security.md`](./README.security.md)
+- FAQ / troubleshooting: [`README.faq.md`](./README.faq.md)
 
 ---
-
-Created by a5c.ai
+Need even more depth? Jump to [USER_GUIDE.md](/USER_GUIDE.md) (concepts + recipes) and [INSTALL.md](/INSTALL.md) (environment setup).
