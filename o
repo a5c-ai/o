@@ -967,6 +967,8 @@ main() {
   if [[ "$A5C_SELECTED_CLI_COMMAND" == "codex" ]]; then
     info "running: ${A5C_CLI_COMMAND_INTERACTIVE}"
     RES="${A5C_CLI_COMMAND_INTERACTIVE} -- \"read ${prompt_path} and follow the instructions in the file. use bash instead of powershell.\""
+    # run the command
+    eval "$RES"
   elif [[ "$A5C_SELECTED_CLI_COMMAND" == "claude-code" ]]; then
     info "running: ${A5C_CLI_COMMAND_INTERACTIVE}"
     RES="${A5C_CLI_COMMAND_INTERACTIVE} -p \"read ${prompt_path} and follow the instructions in the file. use bash instead of powershell.\""
