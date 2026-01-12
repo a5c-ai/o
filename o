@@ -928,7 +928,7 @@ main() {
   elif [[ "$A5C_SELECTED_CLI_COMMAND" == "claude-code" ]]; then
     export A5C_INSTALL_COMMAND="npm install -g @anthropic-ai/claude-code"
     export A5C_BASE_COMMAND=`which claude`
-    export A5C_CLI_ADDITIONAL_PARAMS="-p 'fulfill the request' --output-format stream-json --allowedTools Bash,Read,Glob,Grep,Write,MultiEdit,Edit,NotebookRead,NotebookEdit,WebFetch,TodoRead,TodoWrite,WebSearch,Task,Agent,mcp__github,mcp__agent_reporter --dangerously-skip-permissions --verbose --model ${A5C_SELECTED_MODEL}"
+    export A5C_CLI_ADDITIONAL_PARAMS="--output-format stream-json --allowedTools Bash,Read,Glob,Grep,Write,MultiEdit,Edit,NotebookRead,NotebookEdit,WebFetch,TodoRead,TodoWrite,WebSearch,Task,Agent,mcp__github,mcp__agent_reporter --dangerously-skip-permissions --verbose --model ${A5C_SELECTED_MODEL}"
     if [[ "$A5C_PROVIDER_NAME" == "azure" ]]; then
       die "Azure is not supported yet for claude-code."
     elif [[ "$A5C_PROVIDER_NAME" == "bedrock" ]]; then
@@ -964,9 +964,12 @@ main() {
   prompt_path="$(mktemp)"
   render_prompt_file "$orchestration_agent_script" "$request" "$prompt_path"
 
-  if [[ "$A5C_SELECTED_CLI_COMMAND" == "codex" || "$A5C_SELECTED_CLI_COMMAND" == "claude-code" ]]; then
+  if [[ "$A5C_SELECTED_CLI_COMMAND" == "codex" ]]; then
     info "running: ${A5C_CLI_COMMAND_INTERACTIVE}"
     RES="${A5C_CLI_COMMAND_INTERACTIVE} -- \"read ${prompt_path} and follow the instructions in the file. use bash instead of powershell.\""
+  elif [[ "$A5C_SELECTED_CLI_COMMAND" == "claude-code" ]]; then
+    info "running: ${A5C_CLI_COMMAND_INTERACTIVE}"
+    RES="${A5C_CLI_COMMAND_INTERACTIVE} -p \"read ${prompt_path} and follow the instructions in the file. use bash instead of powershell.\""
     # run the command
     eval "$RES"
   else
