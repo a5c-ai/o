@@ -1,8 +1,5 @@
 <div align="center" id="hero">
-  <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="./o-hero-dark.svg">
-    <img src="./o-hero-light.svg" alt="o orchestration hero" width="720">
-  </picture>
+
   <h1>babysitter -- Codify and run high-assurance agent processes</h1>
   <p>Stop babysitting your agents -- `./o` keeps orchestration prompts, quality gates, and audit trails versioned next to your code.</p>
   <p>
